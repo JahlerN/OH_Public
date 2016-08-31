@@ -1,0 +1,331 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="SharedFiles">
+      <UniqueIdentifier>{dff289fb-7a82-4351-b971-4ce285bd9bf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SharedFiles\Header Files">
+      <UniqueIdentifier>{4b0a1668-7651-4f25-8e0c-33582e7202c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SharedFiles\Source Files">
+      <UniqueIdentifier>{3b1252e6-2aa7-4ebd-b0d6-5c596f488da8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="N3Base">
+      <UniqueIdentifier>{3f8a60a6-acae-4360-b0c9-48a79db4b1f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="N3Base\Header Files">
+      <UniqueIdentifier>{2f273beb-8592-4736-8fdf-f3ee4988b711}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="N3Base\Source Files">
+      <UniqueIdentifier>{f47b4626-b8f3-46fa-be6c-95f7f6ea67fd}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Handlers">
+      <UniqueIdentifier>{33cf987e-3a55-4a3d-8c33-a9c3ddb0d455}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Database">
+      <UniqueIdentifier>{d972b8f0-6800-418c-9362-118b738da6dd}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Database">
+      <UniqueIdentifier>{043c577f-d9f1-4ff8-acd1-897b030593a6}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="User.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Packets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\ByteBuffer.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\CircularBuffer.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\ClientSocketMgr.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\Condition.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\crc32.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\Ini.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\JvCryption.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\ListenSocket.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\lzf.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\Mutex.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\OdbcCommand.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\OdbcConnection.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\OdbcParameter.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\OHSocket.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\OHSocketMgr.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\Packet.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\RWLock.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\Socket.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\SocketDefines.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\SocketMgr.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\stdafx.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\STLMap.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\tstring.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\types.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\globals.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DBAgent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemTemplate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MAP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Region.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\N3Base\N3ShapeMgr.h">
+      <Filter>N3Base\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\N3Base\My_3DStruct.h">
+      <Filter>N3Base\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\N3Base\My_Macro.h">
+      <Filter>N3Base\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\N3Base\StdAfxBase.h">
+      <Filter>N3Base\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\N3Base\stdafx.h">
+      <Filter>N3Base\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Unit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChatHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Npc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkillBookTemplate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NpcThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerInstance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MapInstance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\Timer.h">
+      <Filter>SharedFiles\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Database\MySQLConnection.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Database\stdafx.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Database\QueryResult.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Database\AccountDatabase.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Database\GameDatabase.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="User.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\CircularBuffer.cpp">
+      <Filter>SharedFiles\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\crc32.cpp">
+      <Filter>SharedFiles\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\Ini.cpp">
+      <Filter>SharedFiles\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\JvCryption.cpp">
+      <Filter>SharedFiles\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\lzf.cpp">
+      <Filter>SharedFiles\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\OdbcCommand.cpp">
+      <Filter>SharedFiles\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\OdbcConnection.cpp">
+      <Filter>SharedFiles\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\OdbcParameter.cpp">
+      <Filter>SharedFiles\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\OHSocket.cpp">
+      <Filter>SharedFiles\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\Socket.cpp">
+      <Filter>SharedFiles\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\SocketMgr.cpp">
+      <Filter>SharedFiles\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DBAgent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MAP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Region.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\N3Base\N3ShapeMgr.cpp">
+      <Filter>N3Base\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InventoryHandler.cpp">
+      <Filter>Source Files\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="ChatHandler.cpp">
+      <Filter>Source Files\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandHandler.cpp">
+      <Filter>Source Files\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="Npc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AttackHandler.cpp">
+      <Filter>Source Files\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="SkillHandler.cpp">
+      <Filter>Source Files\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="NpcThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerInstance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MapInstance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Database\MySQLConnection.cpp">
+      <Filter>Source Files\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Database\stdafx.cpp">
+      <Filter>Source Files\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Database\QueryResult.cpp">
+      <Filter>Source Files\Database</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Define.h">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

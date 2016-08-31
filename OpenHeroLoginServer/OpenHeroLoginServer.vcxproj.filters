@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Shared">
+      <UniqueIdentifier>{c4da2cf6-2407-476c-9d73-4d0ab6736f2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shared\Header Files">
+      <UniqueIdentifier>{91155ccf-d97e-45d7-bc47-b3287d670b51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shared\Source Files">
+      <UniqueIdentifier>{021ec855-34c6-4279-824b-77481c848e84}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="define.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DBProcess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginSession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\ByteBuffer.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\CircularBuffer.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\ClientSocketMgr.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\Condition.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\crc32.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\Ini.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\JvCryption.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\ListenSocket.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\lzf.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\Mutex.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\OdbcCommand.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\OdbcConnection.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\OdbcParameter.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\OHSocket.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\OHSocketMgr.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\Packet.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\RWLock.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\Socket.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\SocketDefines.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\SocketMgr.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\stdafx.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\STLMap.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\tstring.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedFiles\types.h">
+      <Filter>Shared\Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DBProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginSession.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\CircularBuffer.cpp">
+      <Filter>Shared\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\crc32.cpp">
+      <Filter>Shared\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\Ini.cpp">
+      <Filter>Shared\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\JvCryption.cpp">
+      <Filter>Shared\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\lzf.cpp">
+      <Filter>Shared\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\OdbcCommand.cpp">
+      <Filter>Shared\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\OdbcConnection.cpp">
+      <Filter>Shared\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\OdbcParameter.cpp">
+      <Filter>Shared\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\OHSocket.cpp">
+      <Filter>Shared\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\Socket.cpp">
+      <Filter>Shared\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedFiles\SocketMgr.cpp">
+      <Filter>Shared\Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
