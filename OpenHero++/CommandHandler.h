@@ -40,6 +40,7 @@ public:
 	bool HandleResetStats(CommandArgs& vArgs, const char* args, const char* description, CUser* pSendUser);
 	bool HandleHeal(CommandArgs& vArgs, const char* args, const char* description, CUser* pSendUser);
 	bool HandleAddGold(CommandArgs& vArgs, const char* args, const char* description, CUser* pSendUser);
+	bool HandleReload(CommandArgs& vArgs, const char* args, const char* description, CUser* pSendUser);
 };
 
 typedef std::map<std::string, Command<CommandHandler> *> CommandTable;

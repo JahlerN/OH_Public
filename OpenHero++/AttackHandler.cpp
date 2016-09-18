@@ -13,8 +13,11 @@ void CUser::HandleAttack(Packet& pkt)
 
 	pkt >> attackCounter >> distance >> attackId >> unk2 >> unk3;
 
-	if (IsDead() || GetMapInstance() == NULL || m_currentAttackRequest.IsAttacking() || m_currentAttackRequest.IsCasting())// || IsBlinking())
+	if (IsDead() || GetMapInstance() == NULL)// || IsBlinking())
 		return;
+
+	if (m_currentAttackRequest.IsAttacking() || m_currentAttackRequest.IsCasting())
+		m_currentAttackRequest.FinishCurrentAttack();
 
 	Packet result(PKT_GAMESERVER_REQUEST_ATTACK);
 	result << attackCounter;
@@ -81,8 +84,11 @@ void CUser::HandleAoeAttack(Packet& pkt)
 
 	pkt >> attackCounter >> distance >> attackId >> unk2;
 
-	if (IsDead() || GetMapInstance() == NULL || m_currentAttackRequest.IsAttacking() || m_currentAttackRequest.IsCasting())// || IsBlinking())
+	if (IsDead() || GetMapInstance() == NULL)// || IsBlinking())
 		return;
+
+	if (m_currentAttackRequest.IsAttacking() || m_currentAttackRequest.IsCasting())
+		m_currentAttackRequest.FinishCurrentAttack();
 
 	Packet result(PKT_GAMESERVER_REQUEST_ATTACK_AOE);
 	result << attackCounter;

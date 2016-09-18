@@ -218,6 +218,9 @@
     <ClInclude Include="..\Database\GameDatabase.h">
       <Filter>Header Files\Database</Filter>
     </ClInclude>
+    <ClInclude Include="ItemMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -321,6 +324,9 @@
     </ClCompile>
     <ClCompile Include="..\Database\QueryResult.cpp">
       <Filter>Source Files\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemMgr.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

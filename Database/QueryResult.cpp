@@ -27,8 +27,12 @@ void QueryResult::Delete()
 	{
 		delete m_lengths;
 		m_lengths = NULL;
-	}*/
-	
+	}*/	
+}
+
+bool QueryResult::IsEmpty()
+{
+	return m_rowCount == 0;
 }
 
 bool QueryResult::NextRow()

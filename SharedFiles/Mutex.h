@@ -74,6 +74,21 @@ public:
 
 		++m_recursiveCount;
 	}
+
+	__forceinline void WaitForUnlock()
+	{
+		DWORD thread_id = GetCurrentThreadId();
+
+		for (;;)
+		{
+			DWORD owner = InterlockedCompareExchange(&m_lock, thread_id, 0);
+			if (owner == 0)
+				break;
+		}
+
+		InterlockedCompareExchange(&m_lock, 0, 0);
+	}
+
 	__forceinline bool AttemptAcquire()
 	{
 		DWORD thread_id = GetCurrentThreadId();

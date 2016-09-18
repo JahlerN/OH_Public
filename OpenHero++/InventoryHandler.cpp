@@ -622,6 +622,28 @@ ByteBuffer CUser::GetVisibleItemList()
 	return result;
 }
 
+void CUser::SendAddItemSilent(_ITEM_DATA* pItem, _ITEM_TABLE* pTable, uint16 slot)
+{
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(0x0A));
+	result << pItem->itemId
+		<< uint8(0)
+		<< pTable->m_itemRarity
+		<< uint16(1)
+		<< uint16(slot);
+	//Hero just wants this if the rarity is that high.
+	if (pTable->m_itemRarity > 161 || pTable->m_itemRarity == 0)
+	{
+		foreach_array_n(j, pItem->upgrades, MAX_ITEM_UPGRADE_AMOUNT)
+			result << pItem->upgrades[j];
+		result << pItem->holeCount;
+		foreach_array_n(j, pItem->holes, MAX_ITEM_UPGRADE_AMOUNT - 1)
+			result << pItem->holes[j];
+	}
+	result << uint32(0);
+
+	Send(&result);
+}
+
 bool CUser::UpgradeItem(uint16 slot, uint8 upgCode)
 {
 	if (slot > IS_END - 1)
@@ -648,18 +670,7 @@ bool CUser::UpgradeItem(uint16 slot, uint8 upgCode)
 	result << uint32(0);
 	Send(&result);*/
 
-	Packet result(0x54, uint8(0x02));
-	result << uint8(0xA1) << uint8(0x0F) << uint8(0x01);
-	result << pItem->itemId << uint8(0) << pTable->m_itemRarity << pItem->count << slot;
-
-	for (int i = 0; i < MAX_ITEM_UPGRADE_AMOUNT; i++)
-		result << pItem->upgrades[i];
-
-	result << pItem->holeCount;
-	for (int i = 0; i < 14; i++)
-		result << pItem->holes[i];
-
-	Send(&result);
+	SendUpgradeItemResult(2, slot, pTable);
 	SendCharacterUpdate();
 	SendVisibleItemListToRegion();
 
@@ -736,29 +747,35 @@ uint32 CUser::FindItemTotalCount(uint32 itemId)
 	return totalCount;
 }
 
-void CUser::GiveItem(uint32 itemId, uint16 count /* = 1 */)
+bool CUser::GiveItem(uint32 itemId, uint16 count /* = 1 */)
 {
 	bool newItem = true;
 	_ITEM_TABLE* pTable = sObjMgr->GetItemTemplate(itemId);
 	if (pTable == NULL)
-		return;
+		return false;
 
 	//TODO: Implement items auto stacking. Find slot with item, add it, check if it exceeds the max slot stack, add to new, cotninue
-	int pos = FindFreeInventorySlot();
+	int pos = -1;
+	if (pTable->m_stackable)
+		pos = FindFreeInventorySlot(itemId, count);
+	else
+		pos = FindFreeInventorySlot();
+
 	if (pos < 0)
-		return;
+		return false;
 
 	_ITEM_DATA* pItem = &m_userData->m_itemArray[pos];
-	if (pItem->count > 1)
+	if (pItem->count > 0)
 	{
 		//We have the item already
 		if (!pTable->m_stackable || pItem->itemId != itemId)
-			return;
+			return false;
 
 		newItem = false;
 	}
 
-	pItem->Initialize();
+	if (newItem)
+		pItem->Initialize();
 	pItem->itemId = itemId;
 	pItem->count += count;
 	if (pItem->count > MAX_ITEM_STACK)
@@ -770,7 +787,44 @@ void CUser::GiveItem(uint32 itemId, uint16 count /* = 1 */)
 
 	SendAcquireItem(pItem, pTable, pos, newItem);
 	SendUpdateItemSlot(pTable, pItem->count);
+	//SendBoughtItem(pTable, pItem->count, 0, pos);
 	//g_main->m_dbAgent.SaveUserInventory(m_userData);
+	return true;
+}
+
+bool CUser::GiveItem(uint32 itemId, int pos, uint16 count /* = 1 */)
+{
+	bool newItem = true;
+	_ITEM_TABLE* pTable = sObjMgr->GetItemTemplate(itemId);
+	if (pTable == NULL)
+		return false;
+
+	_ITEM_DATA* pItem = &m_userData->m_itemArray[pos];
+	if (pItem->count > 1)
+	{
+		//We have the item already
+		if (!pTable->m_stackable || pItem->itemId != itemId)
+			return false;
+
+		newItem = false;
+	}
+
+	if (newItem)
+		pItem->Initialize();
+	pItem->itemId = itemId;
+	pItem->count += count;
+	if (pItem->count > MAX_ITEM_STACK)
+		pItem->count = MAX_ITEM_STACK;
+
+	//pItem->expirationTime = pTable->m_duration;
+	if (pTable->m_itemRarity == 255)//TODO: Hero seems to be doing this on alot of items!
+		pItem->count = pTable->m_duration;
+
+	//SendAcquireItem(pItem, pTable, pos, newItem);
+	//SendUpdateItemSlot(pTable, pItem->count);
+	SendAddItemSilent(pItem, pTable, pos);
+	//g_main->m_dbAgent.SaveUserInventory(m_userData);
+	return true;
 }
 
 void CUser::GiveItem(_ITEM_DATA* pItem, int pos /*= -1*/)
@@ -929,18 +983,37 @@ void CUser::SendAcquireItem(_ITEM_DATA* pItem, _ITEM_TABLE* pTable, uint16 pos, 
 	Send(&result);
 }
 
-void CUser::SendBoughtItem(_ITEM_TABLE* pTable, uint16 count, uint32 duration, uint16 pos, bool newItem /* = false */)
+void CUser::SendBoughtItem(_ITEM_TABLE* pTable, uint16 count, uint32 duration, uint16 pos)
 {
-	Packet result(PKT_GAMESERVER_ITEM_STACK_CHANGE);
-	result << uint8(0x01) << uint8(0x0A); //Success.
-	result << uint8(0x00) << pTable->m_itemId << uint8(0x00);
+	Packet result(PKT_GAMESERVER_ITEM_STACK_CHANGE, uint8(1));//1 buy 2 sell
+	result << uint8(0x0A) << uint8(0x00); //Success.
+	result << pTable->m_itemId << uint8(0x00);
 	result << uint8(pTable->m_itemRarity);
 	result << count;
 	result << pos;
 	result << uint32(0x00000000); //Unk
-	result << uint32(0x00000000); //Unk, new gold!
-	result << uint32(0x00000000); //Unk
+	result << m_userData->m_gold;
 	result << uint16(0x1c20) << uint16(0x0000);//Unk
+
+	Send(&result);
+}
+
+void CUser::SendSoldItem(_ITEM_TABLE* pTable, uint16 pos)
+{
+	Packet result(PKT_GAMESERVER_ITEM_STACK_CHANGE, uint8(2));//1 buy 2 sell
+	result << uint8(0x0A) << uint8(0x00); //Success.
+	result << pTable->m_itemId;
+	result << pos;
+	result << m_userData->m_gold;
+	result << uint16(0x1c20) << uint16(0x0000);//Unk
+
+	Send(&result);
+}
+
+void CUser::SendUpdateGoldSilent()
+{
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(0x0B));
+	result << m_userData->m_gold;
 
 	Send(&result);
 }
@@ -970,7 +1043,7 @@ void CUser::HandleUseItem(_ITEM_DATA* pItem)
 
 	if ((pTable->m_itemType == 161 || pTable->m_itemType == 162) && CanEquipItem(pTable))
 	{
-		_SKILL_BOOK_DATA* pSTable = g_main->GetSkillBookData(pItem->itemId);
+		_SKILL_BOOK_DATA* pSTable = sObjMgr->GetSkillBookInfo(pItem->itemId);
 		if (pSTable == NULL)
 			return;
 
@@ -995,7 +1068,7 @@ void CUser::HandleUseItem(_ITEM_DATA* pItem)
 		SendSkillBookAdded(&m_userData->m_skillBookArray[bookAdded], bookAdded);
 	}
 
-	//return;
+	return;
 
 return_fail:
 	Packet result(PKT_GAMESERVER_MOVE_ADD_ITEM, uint8(MOVE_USE_ITEM));
@@ -1159,6 +1232,7 @@ void CUser::SendGoldUpdate()
 	Packet result(PKT_GAMESERVER_MOVE_ADD_ITEM, uint8(MOVE_ITEM_PICKUP));
 	result << uint8(0x0A)
 		<< uint8(0)
+		//TODO: Implement remove and add gold, shows correct text.
 		<< uint8(2)//Loose gain? 2 get 1 loose? Might just be a relic of the past.
 		<< m_userData->m_gold;
 
@@ -1199,3 +1273,630 @@ void CUser::SendGoldUpdate()
 //
 //	return pos;
 //}
+
+void CUser::SendOpenBank()
+{
+	uint8 itemCount = 0;
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(5));
+	result << uint8(1);
+	uint8 cPos = result.wpos();
+	result << uint8(0); // Reserve pos for itemCount
+
+	for (int i = BANK_1_START; i < BANK_2_START + 60; i++)
+	{
+		_ITEM_DATA* pItem = &m_userData->m_itemArray[i];
+		if (pItem == NULL || pItem->itemId == 0)
+			continue;
+		result << pItem->itemId
+			<< uint8(0)
+			<< sObjMgr->GetItemTemplate(pItem->itemId)->m_itemRarity
+			<< pItem->count
+			<< i
+			<< uint32(0);
+	}
+
+	Send(&result);
+}
+
+void CUser::HandleBankGold(Packet& pkt)
+{
+	uint8 subOpcode;
+	uint64 amount;
+	pkt >> subOpcode >> amount;
+
+	//Deposit gold to bank
+	if (subOpcode == 1)
+	{
+		if (amount > m_userData->m_gold)
+			return;
+
+		m_userData->m_gold -= amount;
+		m_userData->m_warehouseGold += amount;
+	}
+	//Withdraw gold from bank
+	else if (subOpcode == 2)
+	{
+		if (amount > m_userData->m_warehouseGold)
+			return;
+
+		m_userData->m_warehouseGold -= amount;
+		m_userData->m_gold += amount;
+	}
+
+	Packet result(PKT_GAMESERVER_BANK_MOVE_GOLD, subOpcode);
+	result << m_userData->m_gold
+		<< m_userData->m_warehouseGold;
+
+	Send(&result);
+}
+
+void CUser::OpenStrengtheningWindow()
+{
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(8));
+	result << uint8(1);
+
+	Send(&result);
+}
+
+void CUser::OpenCompositionWindow()
+{
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(0x0F));
+	result << uint8(1);
+
+	Send(&result);
+}
+
+void CUser::OpenAdvancedFusionWindow()
+{
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(0x32));
+	result << uint8(1);
+
+	Send(&result);
+}
+
+void CUser::OpenExtractionWindow()
+{
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(0x17));
+	result << uint8(1);
+
+	Send(&result);
+}
+
+void CUser::OpenDismantleWindow() 
+{
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(0x16));
+	result << uint8(1);
+
+	Send(&result);
+}
+
+void CUser::HandleNpcExchange(Packet& pkt)
+{
+	uint8 subOpcode;
+	uint32 itemId, shopTableId, npcId;
+	uint16 slot, count;
+	pkt >> subOpcode;
+
+	switch (subOpcode)
+	{
+	case 1://buy
+	{
+		pkt >> itemId >> count >> shopTableId >> slot >> npcId;
+
+		//Idk, if they try something funky i guess.
+		if (sObjMgr->GetNpcInfo(npcId)->IsMonster())
+			return;
+
+		_ITEM_TABLE* pTable = sObjMgr->GetItemTemplate(itemId);
+		if (pTable == NULL)
+			return;
+
+		_SHOP_TABLE_ITEM* pShop = sObjMgr->GetShopTableItemInfo(shopTableId);
+		if (pShop == NULL)
+			return;
+
+		//TODO: Make the items stack after being added, hero doesn't allow that when buying items tho.(Client shows incorrect inv data). Just move it after.
+		int pos = FindFreeInventorySlot();
+
+		//No valid slot found
+		if (pos == -1)
+			return;
+
+		//Item costs only gold
+		if (pTable->m_extendedPrice == 0)
+		{
+			if (m_userData->m_gold < pTable->m_buyPrice * count)
+				return;
+
+			if (!GiveItem(itemId, pos, count))
+				return;
+
+			GoldChange(-(pTable->m_buyPrice * count), false);
+		}
+		else//Purchase with item
+		{
+			_ITEM_TABLE* pExtended = sObjMgr->GetItemTemplate(pTable->m_extendedPrice);
+			if (pExtended == NULL)
+				return;
+
+			if (!HasItemCount(pExtended->m_itemId, pTable->m_buyPrice))
+				return;
+
+			if (!GiveItem(itemId, pos, count))
+				return;
+
+			RemoveItem(pExtended->m_itemId, pTable->m_buyPrice);
+		}
+
+		_ITEM_DATA* pItem = &m_userData->m_itemArray[pos];
+
+		SendBoughtItem(pTable, pItem->count, 0, pos);
+		break;
+	}
+	case 2://sell
+	{
+		pkt >> itemId >> count >> slot;
+		_ITEM_TABLE* pTable = sObjMgr->GetItemTemplate(itemId);
+		if (pTable == NULL || pTable->m_extendedPrice != 0)
+			return;
+
+		_ITEM_DATA* pItem = &m_userData->m_itemArray[slot];
+		if (pItem == NULL || pItem->itemId != pTable->m_itemId || pItem->count < count)
+			return;
+
+		pItem->Initialize();
+		GoldChange(pTable->m_sellPrice * count, false);
+
+		SendSoldItem(pTable, slot);
+		break;
+	}
+	default:
+		break;
+	}
+	int i = 0;
+}
+
+void CUser::HandleItemModification(Packet& pkt)
+{
+	uint8 subOpcode;
+	uint8 stoneAmount;
+	uint16 slot, stoneSlot[3], charm, scale;
+	pkt >> subOpcode;
+
+	switch (subOpcode)
+	{
+	case 2://Upg item
+	{
+		//TODO: Implement HT upgrading, right now it won't work like it should. Should add + depending on + on pendent, also need to check all have same +.
+		 pkt >> slot >> stoneAmount;
+
+		if (stoneAmount == 0 || stoneAmount > 3)
+			return;
+
+		if (slot >= IS_END)
+			return;
+
+		_ITEM_DATA* pItem = &m_userData->m_itemArray[slot];
+
+		if (pItem == NULL || pItem->itemId == 0)//TODO: Check for non upgradeable items.
+			return;
+
+		for (int i = 0; i < stoneAmount; i++)
+			pkt >> stoneSlot[i];
+
+		_ITEM_DATA* pStone = &m_userData->m_itemArray[stoneSlot[0]];
+
+		if (pStone == NULL || pStone->itemId == 0 || !HasItemCount(pStone->itemId, stoneAmount))
+			return;
+
+		uint32 goldCost = (sObjMgr->GetItemTemplate(pItem->itemId)->m_buyPrice * (pItem->upgradeCount + 1)) * pow(2, stoneAmount - 1);
+
+		if (m_userData->m_gold < goldCost)
+			return;//TODO: Send error
+
+		pkt >> charm >> scale;
+
+		_ITEM_TABLE* pCharm = NULL;
+		_ITEM_TABLE* pScale = NULL;
+
+		if (charm != 0 && charm < IS_END)
+		{
+			pCharm = sObjMgr->GetItemTemplate(m_userData->m_itemArray[charm].itemId);
+			if (pCharm != NULL && pCharm->m_itemType != 164)
+				pCharm = NULL;
+		}
+
+		if (scale != 0 && scale < IS_END)
+		{
+			pScale = sObjMgr->GetItemTemplate(m_userData->m_itemArray[scale].itemId);
+			if (pScale != NULL && pScale->m_itemType != 166)
+				pScale = NULL;
+
+			if (pScale == NULL)
+				return;
+		}
+
+		bool success = sItemMgr->UpgradeItem(pItem, stoneAmount, pStone->itemId, pCharm == NULL ? 0 : pCharm->m_sellPrice);
+
+		RemoveItem(uint32(pStone->itemId), stoneAmount);
+		GoldChange(-goldCost, false);
+
+		if (success)
+		{
+			SendUpgradeItemResult(1, slot, sObjMgr->GetItemTemplate(pItem->itemId));
+			SendMyInfo();//TODO: Replace with slot/item update.
+		}
+		else if (pScale == NULL)
+		{
+			SendUpgradeItemResult(0, slot, sObjMgr->GetItemTemplate(pItem->itemId));
+			RemoveItem(pItem->itemId);
+		}
+		else
+		{
+			pItem->RemoveUpgrades(uint8(pScale->m_sellPrice));
+			SendUpgradeItemResult(2, slot, sObjMgr->GetItemTemplate(pItem->itemId));
+		}
+
+		if (pCharm != NULL)
+			RemoveBySlot(charm);
+		if (pScale != NULL)
+			RemoveBySlot(scale);
+
+		if (IsEquipSlot(slot))
+		{
+			UpdateItemSlotValues();
+			SendCharacterUpdate();
+			SendVisibleItemListToRegion();
+		}
+		break;
+	}
+	case 4://Composition
+	{
+		uint8 numItems, slot2Count, slot3Count;
+		uint16 slot1, slot2, slot3, slot4, resultSlot;
+
+		pkt >> numItems >> slot1 >> slot2 >> slot2Count >> slot3 >> slot3Count >> slot4 >> resultSlot;
+
+		_ITEM_DATA* pBook = &m_userData->m_itemArray[slot1];
+
+		if (pBook == NULL || pBook->itemId == 0)
+			return;
+
+		_MAKE_ITEM_TABLE* pMake = sObjMgr->GetMakeItemTable(pBook->itemId);
+		if (pMake == NULL)
+			return;
+
+		_ITEM_DATA* pReqItem1 = &m_userData->m_itemArray[slot2];
+		_ITEM_DATA* pReqItem2 = &m_userData->m_itemArray[slot3];
+		_ITEM_DATA* pReqItem3 = NULL;
+		if (pReqItem1 == NULL || pReqItem2 == NULL)
+			return;
+
+		if (!HasItemCount(pReqItem1->itemId, pMake->reqItemCount1) || !HasItemCount(pReqItem2->itemId, pMake->reqItemCount2))
+			return;
+
+		_ITEM_TABLE* pHammer = NULL;
+
+		if (pMake->reqItemId3 != 0 && !HasItemCount(pMake->reqItemId3, 1))
+			return;
+		else if(pMake->reqItemId3 != 0)
+		{
+			pReqItem3 = &m_userData->m_itemArray[slot4];
+			if (pReqItem3 == NULL)
+				return;
+		}
+
+		if (pReqItem3 == NULL && slot4 != 0)
+		{
+			pHammer = sObjMgr->GetItemTemplate(m_userData->m_itemArray[slot4].itemId);
+			if (pHammer != NULL && pHammer->m_itemType != 167)
+				pHammer == NULL;
+		}
+
+		if (m_userData->m_gold < pMake->reqGold)
+			return;
+
+		int slot = FindFreeInventorySlot();
+		if (slot == -1)
+			return;
+
+		_ITEM_TABLE* pResItem = sObjMgr->GetItemTemplate(pMake->resultItem);
+		if (pResItem == NULL)
+			return;
+
+		GoldChange(-pMake->reqGold, false);
+
+		SendUpdateGoldSilent();
+
+		bool success = sItemMgr->ComposeItem(pMake, pHammer == NULL ? 0 : pHammer->m_sellPrice);
+
+		Packet result;
+
+		if (success)
+		{
+			//TODO: Check for adding failure w/e
+			GiveItem(pMake->resultItem, slot, 1);
+			result.Initialize(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(0x0A));
+			result << pMake->resultItem
+				<< uint8(0)
+				<< pResItem->m_itemRarity
+				<< uint16(1)
+				<< uint16(slot);
+			//Hero just wants this if the rarity is that high.
+			if (pResItem->m_itemRarity > 161 || pResItem->m_itemRarity == 0)
+			{
+				foreach_array_n(j, pItem->upgrades, MAX_ITEM_UPGRADE_AMOUNT)
+					result << uint8(0);
+				result << uint8(0);
+				foreach_array_n(j, pItem->holes, MAX_ITEM_UPGRADE_AMOUNT - 1)
+					result << uint8(0);
+			}
+			result << uint32(0);
+
+			Send(&result);
+
+			SendItemModificationStatusMessage(subOpcode, 4104);
+		}
+		else
+			SendItemModificationStatusMessage(subOpcode, 4104, 0);
+
+		
+		RemoveBySlot(slot1);
+		RemoveBySlot(slot2);
+		RemoveBySlot(slot3);
+
+		if (pReqItem3 != NULL)
+			RemoveBySlot(slot4);
+
+		break;
+	}
+	case 5://Dismantle
+	{
+		uint16 slot1, slot2;
+		pkt >> slot1 >> slot2;//No clue what slot 2 is even used for.
+
+		uint16 numSlotsFree = CountFreeInventorySlots();
+		if (numSlotsFree < 4)
+			return;
+
+		if (slot1 == 0 || slot1 >= IS_END)
+			return;
+
+		_ITEM_DATA* pDismantleItem = &m_userData->m_itemArray[slot1];
+		if (pDismantleItem->itemId == 0 || pDismantleItem->count == 0)
+			return;
+
+		_DISMANTLE_ITEM* pDismantle = sObjMgr->GetDismantleItemTable(pDismantleItem->itemId);
+		if (pDismantle == NULL)
+			return;
+
+		if (m_userData->m_gold < pDismantle->goldReq)
+			return;
+
+		GoldChange(-pDismantle->goldReq, false);
+		SendUpdateGoldSilent();
+
+		//TODO: Check for 2nd job promotion.
+		uint32* resultingItems = new uint32[MAX_DISMANTLE_RESULTS];
+		bool success = sItemMgr->DismantleItem(pDismantle, resultingItems);
+
+		//I'm aware that this right here, is messy as fuck.
+		if (success)
+		{
+			Packet result(PKT_GAMESERVER_MODIFY_ITEM, uint8(subOpcode));
+			result << 4200;
+			int startSlot = -1;
+			uint16 startSlotPos = result.wpos();
+			result << uint8(1)
+				<< uint64(321);//Gold reward.
+			uint8 counter = 0;
+			uint16 countPos = result.wpos();
+			result << uint8(0);
+
+			for (int i = 0; i < MAX_DISMANTLE_RESULTS - 1; i++)
+			{
+				if (resultingItems[i] == 0)
+					continue;
+
+				int pos = FindFreeInventorySlot();
+				if (pos == -1)
+					continue;
+
+				if (startSlot == -1)
+				{
+					startSlot = i + 1;
+					result.put(startSlotPos, startSlot);
+				}
+
+				counter++;
+
+				uint16 count = sItemMgr->RollRange(1, pDismantle->rewardMaxCount[i]);
+				
+				result << resultingItems[i] << uint8(0) << uint8(161)
+					<< count << pos << uint32(0);
+
+				GiveItem(resultingItems[i], pos, count);
+			}
+			result.put(countPos, counter);
+
+			if (resultingItems[MAX_DISMANTLE_RESULTS - 1] != 0)
+			{
+				int pos = FindFreeInventorySlot();
+				if (pos != -1)
+				{
+					result << resultingItems[MAX_DISMANTLE_RESULTS - 1] << uint8(0) << uint8(161)
+						<< 1 << pos << uint32(0);
+
+					GiveItem(resultingItems[MAX_DISMANTLE_RESULTS - 1], pos, 1);
+				}
+			}
+
+			SendItemModificationStatusMessage(subOpcode, 4200, 0);
+
+			Send(&result);
+
+			RemoveBySlot(slot1);
+		}
+		else
+		{
+			RemoveBySlot(slot1);
+			SendItemModificationStatusMessage(subOpcode, 4203, 0);
+		}
+		break;
+	}
+	case 6://Extraction
+	{
+		uint16 slot1, slot2;
+		pkt >> slot1 >> slot2;//No clue what slot 2 is even used for.
+
+		SendItemModificationStatusMessage(subOpcode, 4303, 0);
+
+		break;
+	}
+	case 9://Advanced fusion
+	{
+		uint8 numItems;
+		uint16 slot1, slot2, slot3, hammer, unk;
+		pkt >> numItems >> slot1 >> slot2 >> slot3 >> hammer >> unk;
+
+		_ITEM_DATA* pReqItem1 = &m_userData->m_itemArray[slot1];
+		_ITEM_DATA* pReqItem2 = &m_userData->m_itemArray[slot2];
+		_ITEM_DATA* pReqItem3 = &m_userData->m_itemArray[slot3];
+
+		if (pReqItem1 == NULL || pReqItem2 == NULL || pReqItem3 == NULL)
+			return;
+
+		if (pReqItem1->itemId != pReqItem2->itemId || pReqItem1->itemId != pReqItem3->itemId)
+			return;
+
+		_MAKE_ITEM_FUSION_TABLE* pMakeFusion = sObjMgr->GetMakeItemFusionTable(pReqItem1->itemId);
+		if (pMakeFusion == NULL)
+			return;
+
+		_ITEM_TABLE* pHammer = NULL;
+		if (hammer != 0 && hammer < IS_END)
+		{
+			pHammer = sObjMgr->GetItemTemplate(m_userData->m_itemArray[hammer].itemId);
+			//85 = items that increase fusing success rates.
+			if (pHammer != NULL && pHammer->m_itemType != 85)
+				pHammer = NULL;
+		}
+		
+		int pos = FindFreeInventorySlot();
+		if (pos == -1)
+			return;
+
+		GoldChange(-pMakeFusion->reqGold, false);
+		SendUpdateGoldSilent();
+
+		bool success = sItemMgr->FuseItem(pMakeFusion, pHammer == NULL ? 0 : pHammer->m_sellPrice);
+
+		Packet result;
+		if (success)
+		{
+			//Gives resulting item.
+			GiveItem(pMakeFusion->resultItem, pos);
+
+			RemoveBySlot(slot1);
+			RemoveBySlot(slot2);
+			RemoveBySlot(slot3);
+
+			//Success message
+			SendItemModificationStatusMessage(subOpcode, 4104);
+		}
+		else
+		{
+			//Fail message
+			SendItemModificationStatusMessage(subOpcode, 4105, 0);
+		}
+
+		if (pHammer != NULL)
+			RemoveBySlot(hammer);
+
+		break;
+	}
+	default:
+		break;
+	}
+
+}
+
+void CUser::SendItemModificationStatusMessage(uint8 action, uint16 status, uint8 success /*= 1*/)
+{
+	Packet result(PKT_GAMESERVER_MODIFY_ITEM, uint8(action));
+	result << status
+		<< success;
+
+	Send(&result);
+}
+
+void CUser::SendUpgradeItemResult(uint8 res, uint16 slot, _ITEM_TABLE* pTable)
+{
+	_ITEM_DATA* pItem = &m_userData->m_itemArray[slot];
+
+	Packet result(PKT_GAMESERVER_MODIFY_ITEM, uint8(2));
+
+	switch (res)
+	{
+	case 0://fail
+		result << uint8(0xA2) << uint8(0x0F) << uint8(0);
+		result << pTable->m_itemRarity << slot << pItem->itemId;
+		break;
+	case 1://Success
+		result << uint8(0xA1) << uint8(0x0F) << uint8(0x01);
+		result << pItem->itemId << uint8(0) << pTable->m_itemRarity << pItem->count << slot;
+
+		if (pItem->upgradeCount > 0 || pItem->holeCount > 0 || pTable->m_itemRarity > 161)
+		{
+			for (int i = 0; i < MAX_ITEM_UPGRADE_AMOUNT; i++)
+				result << pItem->upgrades[i];
+
+			result << pItem->holeCount;
+			for (int i = 0; i < MAX_ITEM_UPGRADE_AMOUNT - 1; i++)
+				result << pItem->holes[i];
+		}
+		else
+			result << uint32(0);
+		break;
+	case 2://Protected by scale
+		result << uint8(0xA1) << uint8(0x0F) << uint8(0x01);
+		result << pItem->itemId << uint8(0) << pTable->m_itemRarity << pItem->count << slot;
+		if (pItem->upgradeCount > 0 || pItem->holeCount > 0 || pTable->m_itemRarity > 161)
+		{
+			for (int i = 0; i < MAX_ITEM_UPGRADE_AMOUNT; i++)
+				result << pItem->upgrades[i];
+
+			result << pItem->holeCount;
+			for (int i = 0; i < MAX_ITEM_UPGRADE_AMOUNT - 1; i++)
+				result << pItem->holes[i];
+		}
+		else
+			result << uint32(0);
+		break;
+	default:
+		break;
+	}
+
+	Send(&result);
+}
+
+void CUser::RemoveBySlot(int slot) 
+{
+	m_userData->m_itemArray[slot].Initialize();
+
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(0x0A));
+	result << uint32(0)
+		<< uint32(0)
+		<< uint16(slot)
+		<< uint16(0)
+		<< uint32(0)
+		<< uint32(0)
+		<< uint32(0)
+		<< uint32(0)
+		<< uint32(0)
+		<< uint32(0)
+		<< uint32(0)
+		<< uint32(0);
+
+	Send(&result);
+}

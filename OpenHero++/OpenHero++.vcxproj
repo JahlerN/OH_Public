@@ -197,6 +197,7 @@
     <ClInclude Include="DBAgent.h" />
     <ClInclude Include="GameServer.h" />
     <ClInclude Include="Item.h" />
+    <ClInclude Include="ItemMgr.h" />
     <ClInclude Include="ItemTemplate.h" />
     <ClInclude Include="CMap.h" />
     <ClInclude Include="MAP.h" />
@@ -237,6 +238,7 @@
     <ClCompile Include="DBAgent.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="InventoryHandler.cpp" />
+    <ClCompile Include="ItemMgr.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="CMap.cpp" />
     <ClCompile Include="MAP.cpp" />

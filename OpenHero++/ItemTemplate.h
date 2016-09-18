@@ -72,6 +72,7 @@ struct _ITEM_TABLE
 	uint32 m_nextItemStage;//next stage after cloth improve, for example
 	uint8 m_itemType;
 	uint8 m_itemRarity;// 161(0xA1) white, not upgraded, higher that that can have upgs
+	uint32 m_extendedPrice;
 	uint32 m_buyPrice;
 	uint32 m_sellPrice;
 	uint8 m_equipPos;
@@ -151,18 +152,44 @@ struct _GAMBLING_ITEM_TABLE
 	uint32 m_itemId;
 	uint32 m_openingCost;
 	_ITEM_DROP_TABLE* m_dropTable;
+};
 
-	//TODO: Implement this properly.
-	/*__forceinline std::list<_ITEM_DATA*> GenerateGamblingItems()
-	{
-		std::list<_ITEM_DATA*> dropList;
-		std::random_device r;
-		std::seed_seq seed{ r(), r(), r(), r(), r(), r(), r(), r() };
-		std::mt19937 rng(seed);
+//Used in composition
+struct _MAKE_ITEM_TABLE
+{
+	uint32 itemId;
+	uint32 reqItemId1;
+	uint16 reqItemCount1;
+	uint32 reqItemId2;
+	uint16 reqItemCount2;
+	uint32 reqItemId3;
+	uint16 successRate;
+	uint32 reqGold;
+	uint32 resultItem;
+};
 
-		dropList.push_back(g_main->GenerateItem(rng, m_dropTable));
+struct _MAKE_ITEM_FUSION_TABLE
+{
+	uint32 itemId;
+	uint32 reqItemId1;
+	uint16 reqItemCount1;
+	uint32 reqItemId2;
+	uint16 reqItemCount2;
+	uint32 reqItemId3;
+	uint16 successRate;
+	uint32 reqGold;
+	uint32 resultItem;
+};
 
-		return dropList;
-	}*/
+#define MAX_DISMANTLE_RESULTS 4
+struct _DISMANTLE_ITEM
+{
+	uint32 dismantleItemId;
+	uint32 rewardItem[MAX_DISMANTLE_RESULTS - 1];
+	uint16 rewardMaxCount[MAX_DISMANTLE_RESULTS - 1];
+	uint16 chanceForReward;
+	uint32 goldReq;
+	uint32 specialReward;
+	uint16 specialRewardChance;
 };
 #endif

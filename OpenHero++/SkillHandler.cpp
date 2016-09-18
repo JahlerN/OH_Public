@@ -1,5 +1,4 @@
 //Part of the CUser class
-
 #include "stdafx.h"
 #include "Packets.h"
 
@@ -25,7 +24,7 @@ void CUser::HandleSkillPackets(Packet& pkt)
 	pkt >> useWepSlot >> wepType >> skillId >> targetX >> targetZ >> targetY >> target >> unk3 >> target2;
 
 	if (m_currentAttackRequest.IsAttacking() || m_currentAttackRequest.IsCasting())
-		return;
+		m_currentAttackRequest.FinishCurrentAttack();
 
 	//TODO: We can probably refactor this so we don't need to duplicate the checks for the monk cast reuqest and the other chars requests.
 	_PLAYER_SKILL_BOOK_DATA* pBookData = GetSkillbookContainingSkill(skillId);
@@ -78,7 +77,7 @@ void CUser::HandleTimedCastSkillRequest(Packet& pkt)
 	pkt >> unk >> skillId >> tX >> tZ >> tY >> targetId;
 
 	if (m_currentAttackRequest.IsAttacking() || m_currentAttackRequest.IsCasting())
-		return;
+		m_currentAttackRequest.FinishCurrentAttack();
 
 	_PLAYER_SKILL_BOOK_DATA* pBook = GetSkillbookContainingSkill(skillId);
 
@@ -121,18 +120,15 @@ bool CUser::AttemptCastSkillOnNpc(CNpc* pNpc, _PLAYER_SKILL_BOOK_DATA* pBookData
 	result << GetID();
 	result << uint8(pSTable->m_aoeType);
 	result << pSTable->m_skillId;
-	result << pNpc->GetX() << pNpc->GetZ() << pNpc->GetY();//GetX() << GetZ() << GetY();//TODO: Maybe they actualy send the npc position here.
+	result << pNpc->GetX() << pNpc->GetZ() << pNpc->GetY();
 	result << uint8(1) << pNpc->GetID();
-	//might be hit count
 
 	int16 cPos = result.wpos();
 	result << uint8(0);
 
-	uint8 hitCount = 0;
+	uint8 hitCount = 1;
 
 	result << pNpc->GetID() << uint8(1);
-
-	//Loop over map regions and find hit npcs, same thing can work with players.
 
 	//TODO: Don't hit npcs.. lol
 	//Check for additional targets hit.
@@ -162,16 +158,17 @@ bool CUser::AttemptCastSkillOnNpc(CNpc* pNpc, _PLAYER_SKILL_BOOK_DATA* pBookData
 
 		//Allways hit target even if outside aoe. But don't add him twice, that's a bad idea.
 		if (std::find(npcsHit.begin(), npcsHit.end(), pNpc) == npcsHit.end())
-			npcsHit.push_back(pNpc);//TODO: I think this npc gets sent 2 times( hit 2 times, 1 up there and one in the loop here. Might be why shit looks weird at times(Doesn't hit all npcs it should)
+			npcsHit.push_back(pNpc);
 
 		uint16 index = 0;
 		int32* damageForNpc = new int32[npcsHit.size()];
 		foreach(itr, npcsHit)
 		{
-			result << (*itr)->GetID() << uint8(1);
+			if ((*itr)->GetID() != pNpc->GetID())
+				result << (*itr)->GetID() << uint8(1);
 			damageForNpc[index++] = -GetSkillDamage((*itr), pSkillData);
 		}
-		result.put(cPos, npcsHit.size());
+		result.put(cPos, uint8(npcsHit.size()));
 		m_currentAttackRequest.SetAttackData(damageForNpc, pSkillData, npcsHit);
 	}
 	break;

@@ -33,6 +33,7 @@
 #include "User.h"
 
 #include "ObjectMgr.h"
+#include "ItemMgr.h"
 
 #include "DBAgent.h"
 #include "GameServer.h"

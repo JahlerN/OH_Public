@@ -166,7 +166,7 @@ ServerInstance::ServerInstance(_SERVER_INFO* pServerInfo, std::map<long, MAP*> z
 		m_mapInstances.insert(make_pair(pMap->m_zoneNum, mapInstance));
 	}
 
-	auto pNpcTable = g_main->GetNpcTableArray().m_UserTypeMap;
+	auto pNpcTable = sObjMgr->GetNpcInfoArray();
 
 	foreach(itr, pNpcTable)
 	{
@@ -175,7 +175,7 @@ ServerInstance::ServerInstance(_SERVER_INFO* pServerInfo, std::map<long, MAP*> z
 		if (pGroup == NULL)
 			continue;
 
-		_NPC_DATA* pNpcData = g_main->GetNpcTemplateById(pGroup->m_npcId);
+		_NPC_DATA* pNpcData = sObjMgr->GetNpcInfo(pGroup->m_npcId);
 		if (pNpcData == NULL)
 			continue;
 

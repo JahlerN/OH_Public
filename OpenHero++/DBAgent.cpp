@@ -417,250 +417,251 @@ bool CDBAgent::Connect()
 //	return true;
 //}
 
-bool CDBAgent::LoadNpcInfoTable(NpcInfoArray & out)
-{
-	auto_ptr<OdbcCommand> dbCommand(m_AccountDB.CreateCommand());
-	if (dbCommand.get() == NULL)
-		return false;
+//bool CDBAgent::LoadNpcInfoTable(NpcInfoArray & out)
+//{
+//	auto_ptr<OdbcCommand> dbCommand(m_AccountDB.CreateCommand());
+//	if (dbCommand.get() == NULL)
+//		return false;
+//
+//	if (!dbCommand->Execute(_T(SQL_SEL_NPCDATA)))
+//		return false;
+//
+//	if (!dbCommand->hasData())
+//		return false;
+//
+//	float start = GetFloatTime();
+//	do
+//	{
+//		int field = 1;
+//		_NPC_DATA* pData = new _NPC_DATA();
+//		dbCommand->FetchUInt32(field++, pData->m_npcId);
+//		dbCommand->FetchString(field++, pData->m_name);
+//		dbCommand->FetchString(field++, pData->m_phrase);
+//		dbCommand->FetchByte(field++, pData->m_npcType);
+//		dbCommand->FetchUInt32(field++, pData->m_level);
+//		dbCommand->FetchUInt32(field++, pData->m_exp);
+//		dbCommand->FetchUInt32(field++, pData->m_divineExp);
+//		dbCommand->FetchUInt32(field++, pData->m_darknessExp);
+//		dbCommand->FetchByte(field++, pData->m_lootRolls);
+//		dbCommand->FetchUInt32(field++, pData->m_dropId);
+//		dbCommand->FetchUInt32(field++, pData->m_maxHp);
+//		dbCommand->FetchUInt32(field++, pData->m_maxChi);
+//		dbCommand->FetchUInt16(field++, pData->m_unkUse);
+//		dbCommand->FetchUInt32(field++, pData->m_gold);
+//		dbCommand->FetchUInt32(field++, pData->m_minDmg);
+//		dbCommand->FetchUInt32(field++, pData->m_maxDmg);
+//		dbCommand->FetchUInt32(field++, pData->m_minSkillDmg);
+//		dbCommand->FetchUInt32(field++, pData->m_maxSkillDmg);
+//		out.PutData(pData->m_npcId, pData);
+//	} while (dbCommand->MoveNext());
+//	printf("Loaded information about %d Npcs in %.3f second(s).\n", out.GetSize(), GetFloatTime() - start);
+//
+//	return true;
+//}
+//
+//bool CDBAgent::LoadNpcTable(NpcTableArray & out)
+//{
+//	auto_ptr<OdbcCommand> dbCommand(m_AccountDB.CreateCommand());
+//	if (dbCommand.get() == NULL)
+//		return false;
+//
+//	if (!dbCommand->Execute(_T(SQL_SEL_NPC)))
+//		return false;
+//
+//	if (!dbCommand->hasData())
+//		return false;
+//
+//	float start = GetFloatTime();
+//	do
+//	{
+//		int field = 1;
+//		_NPC_GROUP* pData = new _NPC_GROUP();
+//		dbCommand->FetchUInt32(field++, pData->m_npcGroupId);
+//		dbCommand->FetchByte(field++, pData->m_zoneId);
+//		dbCommand->FetchUInt32(field++, pData->m_npcId);
+//		pData->m_rotation = (float)dbCommand->FetchDouble(field++);
+//		pData->m_minX = (float)dbCommand->FetchDouble(field++);
+//		pData->m_minZ = (float)dbCommand->FetchDouble(field++);
+//		pData->m_maxX = (float)dbCommand->FetchDouble(field++);
+//		pData->m_maxZ = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchByte(field++, pData->m_npcsInGroup);
+//		dbCommand->FetchUInt32(field++, pData->m_respawnTime);
+//		out.PutData(pData->m_npcGroupId, pData);
+//	} while (dbCommand->MoveNext());
+//	printf("Loaded %d Npc group instances in %.3f second(s).\n", out.GetSize(), GetFloatTime() - start);
+//
+//	return true;
+//}
 
-	if (!dbCommand->Execute(_T(SQL_SEL_NPCDATA)))
-		return false;
+//bool CDBAgent::LoadSkillTable(SkillTableArray& out)
+//{
+//	auto_ptr<OdbcCommand> dbCommand(m_AccountDB.CreateCommand());
+//	if (dbCommand.get() == NULL)
+//		return false;
+//
+//	if (!dbCommand->Execute(_T(SQL_SEL_SKILLDATA)))
+//		return false;
+//
+//	if (!dbCommand->hasData())
+//		return false;
+//
+//	float start = GetFloatTime();
+//	do
+//	{
+//		int field = 1;
+//		_SKILL_DATA* pData = new _SKILL_DATA();
+//		dbCommand->FetchUInt32(field++, pData->m_skillId);
+//		dbCommand->FetchString(field++, pData->m_name);
+//		dbCommand->FetchString(field++, pData->m_description);
+//		dbCommand->FetchByte(field++, pData->m_skillType);
+//		dbCommand->FetchByte(field++, pData->m_statType);
+//		pData->m_aoeType = (AoeType)dbCommand->FetchByte(field++);
+//		dbCommand->FetchByte(field++, pData->m_pierceType);
+//		dbCommand->FetchByte(field++, pData->m_maxLevel);
+//		dbCommand->FetchByte(field++, pData->m_slot);
+//		dbCommand->FetchByte(field++, pData->m_unlockSlot1);
+//		dbCommand->FetchByte(field++, pData->m_unlockSlot2);
+//		dbCommand->FetchByte(field++, pData->m_levelForUnlock1);
+//		dbCommand->FetchByte(field++, pData->m_levelForUnlock2);
+//		dbCommand->FetchUInt32(field++, pData->m_duration);
+//		dbCommand->FetchUInt32(field++, pData->m_durationPerLevel);
+//		dbCommand->FetchInt32(field++, pData->m_chiUsage);
+//		pData->m_chiUsagePerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchInt32(field++, pData->m_chiUsagePerSecond);
+//		pData->m_chiUsagePerSecondPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchInt32(field++, pData->m_minDmg);
+//		pData->m_minDmgPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchInt32(field++, pData->m_maxDmg);
+//		pData->m_maxDmgPerLevel = (float)dbCommand->FetchDouble(field++);
+//		pData->m_range = (float)dbCommand->FetchDouble(field++);
+//		pData->m_rangePerLevel = (float)dbCommand->FetchDouble(field++);
+//		pData->m_aoe = (float)dbCommand->FetchDouble(field++);
+//		pData->m_aoePerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchInt32(field++, pData->m_cooldown);
+//		dbCommand->FetchInt32(field++, pData->m_statTypeBonus);
+//		pData->m_statTypeBonusPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchSByte(field++, pData->m_poisonDmg);
+//		pData->m_poisonDmgPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchSByte(field++, pData->m_poisonHeal);
+//		pData->m_poisonHealPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchSByte(field++, pData->m_confusionDmg);
+//		pData->m_confusionDmgPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchSByte(field++, pData->m_confusionHeal);
+//		pData->m_confusionHealPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchSByte(field++, pData->m_paralysisDmg);
+//		pData->m_paralysisDmgPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchSByte(field++, pData->m_paralysisHeal);
+//		pData->m_paralysisHealPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchInt16(field++, pData->m_minDmgBonus);
+//		pData->m_minDmgBonusPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchInt16(field++, pData->m_maxDmgBonus);
+//		pData->m_maxDmgBonusPerLevel = (float)dbCommand->FetchDouble(field++);
 
-	if (!dbCommand->hasData())
-		return false;
+//		dbCommand->FetchInt16(field++, pData->m_attackPower);
+//		pData->m_attackPowerPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchInt16(field++, pData->m_defenseivePower);
+//		pData->m_defensivePowerPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchUInt16(field++, pData->m_injury);
+//		pData->m_injuryPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchInt16(field++, pData->m_accuracy);
+//		pData->m_accuracyPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchInt16(field++, pData->m_dodge);
+//		pData->m_dodgePerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchInt16(field++, pData->m_defenseBonus);
+//		pData->m_defenseBonusPerLevel = (float)dbCommand->FetchDouble(field++);
+//		pData->m_movementSpeed = (float)dbCommand->FetchDouble(field++);
+//		pData->m_movementSpeedPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchUInt16(field++, pData->m_minHpChange);
+//		pData->m_minHpChangePerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchUInt16(field++, pData->m_maxHpChange);
+//		pData->m_maxHpChangePerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchUInt16(field++, pData->m_minChiChange);
+//		pData->m_minChiChangePerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchUInt16(field++, pData->m_maxChiChange);
+//		pData->m_maxChiChangePerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchUInt16(field++, pData->m_healPerSecond);
+//		pData->m_healPerSecondPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchByte(field++, pData->m_percentHp);
+//		pData->m_percentHpPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchByte(field++, pData->m_percentChi);
+//		pData->m_percentChiPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchUInt16(field++, pData->m_reflectChance);
+//		pData->m_reflectChancePerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchUInt16(field++, pData->m_reflectPercent);
+//		pData->m_reflectPercentPerLevel = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchUInt32(field++, pData->m_skillBookId);
+//		out.PutData(pData->m_skillId, pData);
+//	} while (dbCommand->MoveNext());
+//	printf("Loaded %d skills in %.3f second(s).\n", out.GetSize(), GetFloatTime() - start);
+//
+//	return true;
+//}
 
-	float start = GetFloatTime();
-	do
-	{
-		int field = 1;
-		_NPC_DATA* pData = new _NPC_DATA();
-		dbCommand->FetchUInt32(field++, pData->m_npcId);
-		dbCommand->FetchString(field++, pData->m_name);
-		dbCommand->FetchString(field++, pData->m_phrase);
-		dbCommand->FetchByte(field++, pData->m_npcType);
-		dbCommand->FetchUInt32(field++, pData->m_level);
-		dbCommand->FetchUInt32(field++, pData->m_exp);
-		dbCommand->FetchUInt32(field++, pData->m_divineExp);
-		dbCommand->FetchUInt32(field++, pData->m_darknessExp);
-		dbCommand->FetchByte(field++, pData->m_lootRolls);
-		dbCommand->FetchUInt32(field++, pData->m_dropId);
-		dbCommand->FetchUInt32(field++, pData->m_maxHp);
-		dbCommand->FetchUInt32(field++, pData->m_maxChi);
-		dbCommand->FetchUInt16(field++, pData->m_unkUse);
-		dbCommand->FetchUInt32(field++, pData->m_gold);
-		dbCommand->FetchUInt32(field++, pData->m_minDmg);
-		dbCommand->FetchUInt32(field++, pData->m_maxDmg);
-		dbCommand->FetchUInt32(field++, pData->m_minSkillDmg);
-		dbCommand->FetchUInt32(field++, pData->m_maxSkillDmg);
-		out.PutData(pData->m_npcId, pData);
-	} while (dbCommand->MoveNext());
-	printf("Loaded information about %d Npcs in %.3f second(s).\n", out.GetSize(), GetFloatTime() - start);
-
-	return true;
-}
-
-bool CDBAgent::LoadNpcTable(NpcTableArray & out)
-{
-	auto_ptr<OdbcCommand> dbCommand(m_AccountDB.CreateCommand());
-	if (dbCommand.get() == NULL)
-		return false;
-
-	if (!dbCommand->Execute(_T(SQL_SEL_NPC)))
-		return false;
-
-	if (!dbCommand->hasData())
-		return false;
-
-	float start = GetFloatTime();
-	do
-	{
-		int field = 1;
-		_NPC_GROUP* pData = new _NPC_GROUP();
-		dbCommand->FetchUInt32(field++, pData->m_npcGroupId);
-		dbCommand->FetchByte(field++, pData->m_zoneId);
-		dbCommand->FetchUInt32(field++, pData->m_npcId);
-		pData->m_rotation = (float)dbCommand->FetchDouble(field++);
-		pData->m_minX = (float)dbCommand->FetchDouble(field++);
-		pData->m_minZ = (float)dbCommand->FetchDouble(field++);
-		pData->m_maxX = (float)dbCommand->FetchDouble(field++);
-		pData->m_maxZ = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchByte(field++, pData->m_npcsInGroup);
-		dbCommand->FetchUInt32(field++, pData->m_respawnTime);
-		out.PutData(pData->m_npcGroupId, pData);
-	} while (dbCommand->MoveNext());
-	printf("Loaded %d Npc group instances in %.3f second(s).\n", out.GetSize(), GetFloatTime() - start);
-
-	return true;
-}
-
-bool CDBAgent::LoadSkillTable(SkillTableArray& out)
-{
-	auto_ptr<OdbcCommand> dbCommand(m_AccountDB.CreateCommand());
-	if (dbCommand.get() == NULL)
-		return false;
-
-	if (!dbCommand->Execute(_T(SQL_SEL_SKILLDATA)))
-		return false;
-
-	if (!dbCommand->hasData())
-		return false;
-
-	float start = GetFloatTime();
-	do
-	{
-		int field = 1;
-		_SKILL_DATA* pData = new _SKILL_DATA();
-		dbCommand->FetchUInt32(field++, pData->m_skillId);
-		dbCommand->FetchString(field++, pData->m_name);
-		dbCommand->FetchString(field++, pData->m_description);
-		dbCommand->FetchByte(field++, pData->m_skillType);
-		dbCommand->FetchByte(field++, pData->m_statType);
-		pData->m_aoeType = (AoeType)dbCommand->FetchByte(field++);
-		dbCommand->FetchByte(field++, pData->m_pierceType);
-		dbCommand->FetchByte(field++, pData->m_maxLevel);
-		dbCommand->FetchByte(field++, pData->m_slot);
-		dbCommand->FetchByte(field++, pData->m_unlockSlot1);
-		dbCommand->FetchByte(field++, pData->m_unlockSlot2);
-		dbCommand->FetchByte(field++, pData->m_levelForUnlock1);
-		dbCommand->FetchByte(field++, pData->m_levelForUnlock2);
-		dbCommand->FetchUInt32(field++, pData->m_duration);
-		dbCommand->FetchUInt32(field++, pData->m_durationPerLevel);
-		dbCommand->FetchInt32(field++, pData->m_chiUsage);
-		pData->m_chiUsagePerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchInt32(field++, pData->m_chiUsagePerSecond);
-		pData->m_chiUsagePerSecondPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchInt32(field++, pData->m_minDmg);
-		pData->m_minDmgPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchInt32(field++, pData->m_maxDmg);
-		pData->m_maxDmgPerLevel = (float)dbCommand->FetchDouble(field++);
-		pData->m_range = (float)dbCommand->FetchDouble(field++);
-		pData->m_rangePerLevel = (float)dbCommand->FetchDouble(field++);
-		pData->m_aoe = (float)dbCommand->FetchDouble(field++);
-		pData->m_aoePerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchInt32(field++, pData->m_cooldown);
-		dbCommand->FetchInt32(field++, pData->m_statTypeBonus);
-		pData->m_statTypeBonusPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchSByte(field++, pData->m_poisonDmg);
-		pData->m_poisonDmgPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchSByte(field++, pData->m_poisonHeal);
-		pData->m_poisonHealPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchSByte(field++, pData->m_confusionDmg);
-		pData->m_confusionDmgPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchSByte(field++, pData->m_confusionHeal);
-		pData->m_confusionHealPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchSByte(field++, pData->m_paralysisDmg);
-		pData->m_paralysisDmgPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchSByte(field++, pData->m_paralysisHeal);
-		pData->m_paralysisHealPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchInt16(field++, pData->m_minDmgBonus);
-		pData->m_minDmgBonusPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchInt16(field++, pData->m_maxDmgBonus);
-		pData->m_maxDmgBonusPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchInt16(field++, pData->m_attackPower);
-		pData->m_attackPowerPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchInt16(field++, pData->m_defenseivePower);
-		pData->m_defensivePowerPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchUInt16(field++, pData->m_injury);
-		pData->m_injuryPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchInt16(field++, pData->m_accuracy);
-		pData->m_accuracyPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchInt16(field++, pData->m_dodge);
-		pData->m_dodgePerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchInt16(field++, pData->m_defenseBonus);
-		pData->m_defenseBonusPerLevel = (float)dbCommand->FetchDouble(field++);
-		pData->m_movementSpeed = (float)dbCommand->FetchDouble(field++);
-		pData->m_movementSpeedPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchUInt16(field++, pData->m_minHpChange);
-		pData->m_minHpChangePerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchUInt16(field++, pData->m_maxHpChange);
-		pData->m_maxHpChangePerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchUInt16(field++, pData->m_minChiChange);
-		pData->m_minChiChangePerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchUInt16(field++, pData->m_maxChiChange);
-		pData->m_maxChiChangePerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchUInt16(field++, pData->m_healPerSecond);
-		pData->m_healPerSecondPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchByte(field++, pData->m_percentHp);
-		pData->m_percentHpPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchByte(field++, pData->m_percentChi);
-		pData->m_percentChiPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchUInt16(field++, pData->m_reflectChance);
-		pData->m_reflectChancePerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchUInt16(field++, pData->m_reflectPercent);
-		pData->m_reflectPercentPerLevel = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchUInt32(field++, pData->m_skillBookId);
-		out.PutData(pData->m_skillId, pData);
-	} while (dbCommand->MoveNext());
-	printf("Loaded %d skills in %.3f second(s).\n", out.GetSize(), GetFloatTime() - start);
-
-	return true;
-}
-
-bool CDBAgent::LoadSkillBookTable(SkillBookTableArray& out)
-{
-	auto_ptr<OdbcCommand> dbCommand(m_AccountDB.CreateCommand());
-	if (dbCommand.get() == NULL)
-		return false;
-
-	if (!dbCommand->Execute(_T(SQL_SEL_SKILLBOOKDATA)))
-		return false;
-
-	if (!dbCommand->hasData())
-		return false;
-
-	float start = GetFloatTime();
-	do
-	{
-		int field = 1;
-		_SKILL_BOOK_DATA* pData = new _SKILL_BOOK_DATA();
-		dbCommand->FetchUInt32(field++, pData->m_skillBookId);
-		dbCommand->FetchString(field++, pData->m_name);
-		dbCommand->FetchByte(field++, pData->m_bookType);
-		dbCommand->FetchByte(field++, pData->m_classReq);
-		dbCommand->FetchByte(field++, pData->m_weaponType);
-		dbCommand->FetchUInt32(field++, pData->m_levelReq);
-		for (int i = 0; i < MAX_SKILLS_IN_BOOK; i++)
-		{
-			auto skill = g_main->GetSkillDataById(dbCommand->FetchUInt32(field++));
-			if (skill == NULL)
-				continue;
-			pData->m_skillData[i] = skill;
-		}
-		out.PutData(pData->m_skillBookId, pData);
-	} while (dbCommand->MoveNext());
-	printf("Loaded info about %d skill books in %.3f second(s).\n", out.GetSize(), GetFloatTime() - start);
-	return true;
-}
-
-bool CDBAgent::LoadZoneStartTable(ZoneStartTableArray & out)
-{
-	auto_ptr<OdbcCommand> dbCommand(m_AccountDB.CreateCommand());
-	if (dbCommand.get() == NULL)
-		return false;
-
-	if (!dbCommand->Execute(_T(SQL_SEL_ZONESTARTDATA)))
-		return false;
-
-	if (!dbCommand->hasData())
-		return false;
-
-	float start = GetFloatTime();
-	do
-	{
-		int field = 1;
-		_ZONESTART_POSITION* pData = new _ZONESTART_POSITION();
-		pData->m_zoneId = dbCommand->FetchUInt32(field++);
-		pData->m_x = (float)dbCommand->FetchDouble(field++);
-		pData->m_z = (float)dbCommand->FetchDouble(field++);
-		pData->m_y = (float)dbCommand->FetchDouble(field++);
-		dbCommand->FetchByte(field++, pData->m_rangeX);
-		dbCommand->FetchByte(field++, pData->m_rangeZ);
-		dbCommand->FetchByte(field++, pData->m_rangeY);
-		out.PutData(pData->m_zoneId, pData);
-	} while (dbCommand->MoveNext());
-	printf("Loaded default position data for %d zones in %.3f second(s).\n", out.GetSize(), GetFloatTime() - start);
-	return true;
-}
+//bool CDBAgent::LoadSkillBookTable(SkillBookTableArray& out)
+//{
+//	auto_ptr<OdbcCommand> dbCommand(m_AccountDB.CreateCommand());
+//	if (dbCommand.get() == NULL)
+//		return false;
+//
+//	if (!dbCommand->Execute(_T(SQL_SEL_SKILLBOOKDATA)))
+//		return false;
+//
+//	if (!dbCommand->hasData())
+//		return false;
+//
+//	float start = GetFloatTime();
+//	do
+//	{
+//		int field = 1;
+//		_SKILL_BOOK_DATA* pData = new _SKILL_BOOK_DATA();
+//		dbCommand->FetchUInt32(field++, pData->m_skillBookId);
+//		dbCommand->FetchString(field++, pData->m_name);
+//		dbCommand->FetchByte(field++, pData->m_bookType);
+//		dbCommand->FetchByte(field++, pData->m_classReq);
+//		dbCommand->FetchByte(field++, pData->m_weaponType);
+//		dbCommand->FetchUInt32(field++, pData->m_levelReq);
+//		for (int i = 0; i < MAX_SKILLS_IN_BOOK; i++)
+//		{
+//			auto skill = sObjMgr->GetSkillInfo(dbCommand->FetchUInt32(field++));
+//			if (skill == NULL)
+//				continue;
+//			pData->m_skillData[i] = skill;
+//		}
+//		out.PutData(pData->m_skillBookId, pData);
+//	} while (dbCommand->MoveNext());
+//	printf("Loaded info about %d skill books in %.3f second(s).\n", out.GetSize(), GetFloatTime() - start);
+//	return true;
+//}
+//
+//bool CDBAgent::LoadZoneStartTable(ZoneStartTableArray & out)
+//{
+//	auto_ptr<OdbcCommand> dbCommand(m_AccountDB.CreateCommand());
+//	if (dbCommand.get() == NULL)
+//		return false;
+//
+//	if (!dbCommand->Execute(_T(SQL_SEL_ZONESTARTDATA)))
+//		return false;
+//
+//	if (!dbCommand->hasData())
+//		return false;
+//
+//	float start = GetFloatTime();
+//	do
+//	{
+//		int field = 1;
+//		_ZONESTART_POSITION* pData = new _ZONESTART_POSITION();
+//		pData->m_zoneId = dbCommand->FetchUInt32(field++);
+//		pData->m_x = (float)dbCommand->FetchDouble(field++);
+//		pData->m_z = (float)dbCommand->FetchDouble(field++);
+//		pData->m_y = (float)dbCommand->FetchDouble(field++);
+//		dbCommand->FetchByte(field++, pData->m_rangeX);
+//		dbCommand->FetchByte(field++, pData->m_rangeZ);
+//		dbCommand->FetchByte(field++, pData->m_rangeY);
+//		out.PutData(pData->m_zoneId, pData);
+//	} while (dbCommand->MoveNext());
+//	printf("Loaded default position data for %d zones in %.3f second(s).\n", out.GetSize(), GetFloatTime() - start);
+//	return true;
+//}
 
 bool CDBAgent::GetAccountSession(CUser* pUser)
 {
@@ -1013,7 +1014,7 @@ bool CDBAgent::LoadUserData(std::string& accountId, std::string& characterId, _U
 
 		skillBookBuf >> skillBookId;
 
-		_SKILL_BOOK_DATA* pData = g_main->GetSkillBookData(skillBookId);
+		_SKILL_BOOK_DATA* pData = sObjMgr->GetSkillBookInfo(skillBookId);
 		if (pData == NULL)
 		{
 			memset(&pUser->m_skillBookArray[i], 0x00, sizeof(struct _PLAYER_SKILL_BOOK_DATA));
@@ -1066,18 +1067,18 @@ bool CDBAgent::LoadWarehouseData(std::string& accountId, _USER_DATA* pUser)
 	dbCommand->FetchBinary(2, items, sizeof(items));
 
 	ByteBuffer itemBuf;
-	itemBuf.append(items);
+	itemBuf.append(items, sizeof(items));
 
 	memset(pUser->m_warehouseArray, 0x00, sizeof(pUser->m_warehouseArray));
 
-	for (int i = 0; i < MAX_WAREHOUSE_SLOTS * 2; i++)
+	for (int i = BANK_1_START; i < BANK_2_START + 60; i++)
 	{
 		uint32 itemId;
 		uint16 count;
 		uint8 upgradeAmount;
-		uint8 upgs[15];
+		uint8 upgs[MAX_ITEM_UPGRADE_AMOUNT];
 		uint8 holeCount;
-		uint8 holes[15];
+		uint8 holes[MAX_ITEM_UPGRADE_AMOUNT];
 
 		itemBuf >> itemId >> count;
 		itemBuf >> upgradeAmount;
@@ -1096,12 +1097,12 @@ bool CDBAgent::LoadWarehouseData(std::string& accountId, _USER_DATA* pUser)
 		else if (count > MAX_ITEM_STACK)
 			count = MAX_ITEM_STACK;
 
-		pUser->m_warehouseArray[i].itemId = itemId;
-		pUser->m_warehouseArray[i].count = count;
-		pUser->m_warehouseArray[i].upgradeCount = upgradeAmount;
-		memmove(pUser->m_warehouseArray[i].upgrades, upgs, sizeof(upgs));
-		pUser->m_warehouseArray[i].holeCount = holeCount;
-		memmove(pUser->m_warehouseArray[i].holes, holes, sizeof(holes));
+		pUser->m_itemArray[i].itemId = itemId;
+		pUser->m_itemArray[i].count = count;
+		pUser->m_itemArray[i].upgradeCount = upgradeAmount;
+		memmove(pUser->m_itemArray[i].upgrades, upgs, sizeof(upgs));
+		pUser->m_itemArray[i].holeCount = holeCount;
+		memmove(pUser->m_itemArray[i].holes, holes, sizeof(holes));
 	}
 
 	return true;
@@ -1160,6 +1161,37 @@ void CDBAgent::SaveUserInventory(_USER_DATA* pUser)
 	if (!dbCommand->Execute(_T(SQL_UPDATE_INVENTORY)))
 	{
 		g_main->PrintSQLError(m_GameDB.GetError());
+		return;
+	}
+}
+
+void CDBAgent::SaveUserWarehouse(_USER_DATA* pUser, std::string accountName)
+{
+	auto_ptr<OdbcCommand> dbCommand(m_AccountDB.CreateCommand());
+	if (dbCommand.get() == NULL)
+		return;
+
+	if (pUser == NULL)
+		return;
+		
+	ByteBuffer itemBuf;
+	for (int i = BANK_1_START; i < BANK_2_START + 60; i++)
+	{
+		_ITEM_DATA* pData = &pUser->m_itemArray[i];
+		itemBuf << pData->itemId << pData->count << pData->upgradeCount;
+		foreach_array_n(j, pData->upgrades, MAX_ITEM_UPGRADE_AMOUNT)
+			itemBuf << pData->upgrades[j];
+		itemBuf << pData->holeCount;
+		foreach_array_n(j, pData->holes, MAX_ITEM_UPGRADE_AMOUNT)
+			itemBuf << pData->holes[j];
+	}
+
+	dbCommand->AddParameter(SQL_PARAM_INPUT, (char*)itemBuf.contents(), itemBuf.size(), SQL_BINARY);
+	dbCommand->AddParameter(SQL_PARAM_INPUT, accountName.c_str(), accountName.size());
+
+	if (!dbCommand->Execute(_T(string_format(SQL_UPD_WAREHOUSE, pUser->m_warehouseGold))))
+	{
+		g_main->PrintSQLError(m_AccountDB.GetError());
 		return;
 	}
 }

@@ -61,6 +61,8 @@ void CUser::Initialize()
 
 	m_meditationTimer.Reset(MEDITATION_TICK);
 	m_abnormalType = ABNORMAL_BLINKING;
+
+	m_currentGossip = NULL;
 }
 
 void CUser::ResetItemSlotValues()
@@ -112,6 +114,7 @@ void CUser::OnDisconnect()
 		UserLeaveEnterRegion(2);
 		g_main->m_dbAgent.SaveUser(m_userData);
 		g_main->m_dbAgent.SaveUserInventory(m_userData);
+		g_main->m_dbAgent.SaveUserWarehouse(m_userData, m_accountId);
 		RemoveRegion(GetRegionX(), GetRegionZ());
 		GetMapInstance()->RemoveUser(this);
 		g_main->GetServerInstanceMgr()->RemoveUserFromServerInstance(this, m_curServerInstance->m_serverInfo->m_tabId, m_curServerInstance->m_serverInfo->m_serverId);
@@ -197,11 +200,23 @@ bool CUser::HandlePacket(Packet& pkt)
 	case PKT_GAMESERVER_REQUEST_CAST_TIMED_SKILL:
 		HandleTimedCastSkillRequest(pkt);
 		break;
+	case PKT_GAMESERVER_WORLD_MAP_TELEPORTER:
+		HandleWorldMapTeleporter(pkt);
+		break;
+	case PKT_GAMESERVER_MODIFY_ITEM:
+		HandleItemModification(pkt);
+		break;
 	case PKT_GAMESERVER_ADD_ITEM_CONTINUOS:
-		HandleNpcConvoTesting(pkt);
+		HandleNpcGossip(pkt);
+		break;
+	case PKT_GAMESERVER_ITEM_STACK_CHANGE:
+		HandleNpcExchange(pkt);
 		break;
 	case PKT_GAMESERVER_MOVE_ADD_ITEM:
 		HandleMoveItem(pkt);
+		break;
+	case PKT_GAMESERVER_BANK_MOVE_GOLD:
+		HandleBankGold(pkt);
 		break;
 	case PKT_GAMESERVER_SKILLBOOK_SKILL:
 		HandleSkillBookPackets(pkt);
@@ -795,6 +810,168 @@ void CUser::HandleCharacterMovement(Packet& pkt)
 	//g_main->SendToRegion(result, GetMap(), GetRegionX(), GetRegionZ(), NULL);
 }
 
+void CUser::HandleNpcGossip(Packet& pkt)
+{
+	uint8 subOpcode;
+	uint16 npcId;
+	uint32 option;
+	pkt >> subOpcode;
+
+	CNpc* pNpc = NULL;
+
+	switch (subOpcode)
+	{
+		case 1:
+			pkt >> npcId;
+
+			pNpc = GetMapInstance()->GetNpcPtr(npcId);
+			m_currentGossip = pNpc;
+
+			if (pNpc == NULL || pNpc->IsMonster() || pNpc->DistanceToTarget(this) > 13.0f)
+				return;
+
+			SendNpcGossip(pNpc);
+			break;
+			//User chose an option in the menu
+		case 2:
+		{
+			pkt >> option;
+			GossipFlag gossipFlag;
+			_GOSSIP_OPTION* pGossipOption = sObjMgr->GetGossipOptionInfo(option);
+			//If there's no definition for it, asssume we're dealing with a new window
+			if (pGossipOption == NULL)
+				gossipFlag = GOSSIP_FLAG_NEW_GOSSIP_TABLE;
+			else
+				gossipFlag = pGossipOption->gossipFlag;
+
+			switch (gossipFlag)
+			{
+			case GOSSIP_FLAG_OPEN_NPC_TRADE:
+			{
+				_SHOP_TABLE* pShop = sObjMgr->GetShopTableInfo(option);
+				SendOpenNpcExchange(pShop);
+				break;
+			}
+			case GOSSIP_FLAG_OPEN_BANK:
+				SendOpenBank();
+				break;
+			case GOSSIP_FLAG_GOTO:
+				if (m_userData->m_gold < pGossipOption->goldCost)
+					return;//TODO: Make error message.
+
+				if(pGossipOption->goldCost > 0)
+					GoldChange(-pGossipOption->goldCost);
+
+				if (pGossipOption->toZone == 14 && m_userData->m_faction != 1)
+					ChangeZone(sObjMgr->GetZoneStartPosition(15));//Special handling for faction districts. TODO: Might want to add a specific value in the table for these occurances.
+				else
+					ChangeZone(sObjMgr->GetZoneStartPosition(pGossipOption->toZone));
+				break;
+			case GOSSIP_FLAG_OPEN_WORLDMAP_TELEPORTER:
+				SendOpenWorldMapTeleporter();
+				break;
+			case GOSSIP_FLAG_OPEN_STRENGTHEN:
+				OpenStrengtheningWindow();
+				break;
+			case GOSSIP_FLAG_OPEN_COMPOSITION:
+				OpenCompositionWindow();
+				break;
+			case GOSSIP_FLAG_OPEN_EXTRACTION:
+				OpenExtractionWindow();
+				break;
+			case GOSSIP_FLAG_OPEN_DISMANTLE:
+				OpenDismantleWindow();
+				break;
+			case GOSSIP_FLAG_OPEN_ADVANCE_FUSION:
+				OpenAdvancedFusionWindow();
+				break;
+			default:
+				SendNpcGossip(option);
+				break;
+			}
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+void CUser::SendNpcGossip(uint32 gossipId)
+{
+	_NPC_GOSSIP* pGossip = sObjMgr->GetNpcGossipInfo(gossipId);
+
+	if (pGossip == NULL)
+		return;
+
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(2));
+	result << pGossip->npcId
+		<< pGossip->npcSayId
+		<< pGossip->optionCount;
+
+	for (int i = 0; i < pGossip->optionCount; i++)
+	{
+		result << pGossip->option[i]
+			<< pGossip->response[i];
+	}
+
+	Send(&result);
+}
+
+void CUser::SendNpcGossip(CNpc* pNpc)
+{
+	_NPC_GOSSIP* pGossip = sObjMgr->GetNpcGossipInfo(sObjMgr->GetNpcInfo(pNpc->GetNpcID())->m_gossipId);
+
+	if (pGossip == NULL)
+		return;
+
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(2));
+	result << pGossip->npcId
+		<< pGossip->npcSayId
+		<< pGossip->optionCount;
+
+	for (int i = 0; i < pGossip->optionCount; i++)
+	{
+		result << pGossip->option[i]
+			<< pGossip->response[i];
+	}
+
+	Send(&result);
+}
+
+void CUser::SendOpenNpcExchange(_SHOP_TABLE* pShop)
+{
+	if (pShop == NULL)
+		return;
+
+	Packet result(PKT_GAMESERVER_ADD_ITEM_CONTINUOS, uint8(3));
+	result << uint8(1)
+		<< pShop->shopId;
+
+	Send(&result);
+}
+
+void CUser::SendOpenWorldMapTeleporter()
+{
+	Packet result(PKT_GAMESERVER_WORLD_MAP_TELEPORTER, uint8(1));
+	result << uint8(1);
+
+	Send(&result);
+}
+
+void CUser::HandleWorldMapTeleporter(Packet & pkt)
+{
+	uint8 subOpcode, zone;
+	pkt >> subOpcode >> zone;
+
+	//TOOD: Handle travel cost.
+	_ZONESTART_POSITION* pZone = sObjMgr->GetZoneStartPosition(zone);
+
+	if (pZone == NULL)
+		return;
+
+	ChangeZone(pZone);
+}
+
 void CUser::HandleNpcConvoTesting(Packet& pkt)
 {
 	uint8 subOpcode;
@@ -924,7 +1101,7 @@ bool CUser::GoToXZ(uint16 posX, uint16 posZ)
 	return true;
 }
 
-void CUser::ChangeZone(_ZONECHANGE_DATA * pZone)
+void CUser::ChangeZone(_ZONECHANGE_DATA* pZone)
 {
 	//TODO: Checks for battlegrounds needed.
 	if (GetLevel() < pZone->m_reqLevel)
@@ -979,6 +1156,24 @@ void CUser::ChangeZone(_ZONECHANGE_DATA * pZone)
 	GetMapInstance()->RegionNpcInfoToMe(this);
 
 	UserLeaveEnterRegion(1);
+}
+
+void CUser::ChangeZone(_ZONESTART_POSITION* pZone)
+{
+	_ZONECHANGE_DATA* pChange = sObjMgr->GetZoneChangeData(pZone->m_zoneId);
+
+	_ZONECHANGE_DATA* pZoneChange = new _ZONECHANGE_DATA();
+	pZoneChange->m_toZoneId = pZone->m_zoneId;
+	pZoneChange->m_posX = pZone->m_x;
+	pZoneChange->m_posZ = pZone->m_z;
+
+	if (pChange == NULL)
+		pZoneChange->m_reqLevel = 0;
+	else
+		pZoneChange->m_reqLevel = pChange->m_reqLevel;
+
+	ChangeZone(pZoneChange);
+	delete pZoneChange;
 }
 
 void CUser::HandleMeditating(uint32 diff)
@@ -1391,10 +1586,11 @@ void CUser::UpdateUserStats()
 	m_dodge += m_itemDodge + DODGE_PER_DEX * totalStats[STAT_DEX];
 
 	m_crit += m_itemCritChance + CRIT_PER_DEX * totalStats[STAT_DEX];
-	if (m_userData->m_itemArray[m_userData->m_activeWeapon].itemId == 0)
-		m_attackSpeed = (1000) + (ATKSPD_PER_DEX * (totalStats[STAT_DEX] - 1)) * 10;
+	/*if (m_userData->m_itemArray[m_userData->m_activeWeapon].itemId == 0)
+		m_attackSpeed = (1000 - (ATKSPD_PER_DEX * (totalStats[STAT_DEX] - 1))) * 10;
 	else
-		m_attackSpeed = (m_itemDelay) + (ATKSPD_PER_DEX * (totalStats[STAT_DEX] - 1)) * 10;
+		m_attackSpeed = (m_itemDelay - (ATKSPD_PER_DEX * (totalStats[STAT_DEX] - 1))) * 10;*/
+	m_attackSpeed = (100 + ATKSPD_PER_DEX * (totalStats[STAT_DEX] - 1)) * 10;
 	m_movementSpeed += m_itemMovementSpeed;
 
 	m_poisonAtk = m_itemPoisonDmg;
@@ -1563,7 +1759,7 @@ void CUser::SendMorphPlayer()
 	{
 		result.Initialize(PKT_GAMESERVER_MORPH_PLAYER);
 
-		if (g_main->GetNpcTemplateById(m_userData->m_morphId) == NULL)
+		if (sObjMgr->GetNpcInfo(m_userData->m_morphId) == NULL)
 			return;
 		result << m_userData->m_morphId;
 		Send(&result);
@@ -1678,14 +1874,16 @@ void CUser::SendMyInfo()
 	result << uint8(4);
 	//D18ED70200000000
 	result << m_userData->m_gold;
-	arr = HEXSTRTOBYTEARR2("14A493D60000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002323031362D30322D30362030323A35323A343600", len);
+	//14A493D600000000
+	result << m_userData->m_warehouseGold;
+	arr = HEXSTRTOBYTEARR2("00000000000000000000000000000000000000000000000000000000000000000000000000000000000002323031362D30322D30362030323A35323A343600", len);
 	foreach_array_n(i, arr, len)
 		result << arr[i];
 	delete[] arr;
 	//2E00
 	uint16 counter = 0;
 	ByteBuffer bTemp;
-	for (int i = 0; i <= MAX_COMBINED_INV_SLOTS / 38; i++)
+	for (int i = 0; i < IS_END; i++)
 	{
 		_ITEM_DATA* pItem = &m_userData->m_itemArray[i];
 		if (pItem->itemId == 0)
@@ -1695,10 +1893,10 @@ void CUser::SendMyInfo()
 		_ITEM_TABLE* pTable = sObjMgr->GetItemTemplate(pItem->itemId);
 
 		bTemp << pItem->itemId << uint8(0x00);
-		bTemp << uint8(pTable->m_itemRarity) << pItem->count;
+		bTemp << pTable->m_itemRarity << pItem->count;
 		bTemp << uint16(i);
 
-		if (pTable->m_itemRarity < 0xA2 && pTable->m_itemRarity != 0)//Can't have + i think.
+		if (pTable->m_itemRarity < 0xA2 && pTable->m_itemRarity != 0 && (pItem->GetUpgradeCount() == 0 && pItem->GetHoleCount() == 0))//Can't have + i think.
 		{
 			bTemp << uint32(0x00000000); //Delimeter?
 			continue;

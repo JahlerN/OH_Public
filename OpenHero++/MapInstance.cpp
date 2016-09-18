@@ -288,7 +288,7 @@ void MapInstance::SendRegionNpcList(uint16 rx, uint16 rz, CUser * pSendUser)
 	{
 		result.Initialize(PKT_GAMESERVER_REGION_CHANGE_NPC, uint8(0x01));
 		CNpc* pNpc = GetNpcPtr(itr->first);
-		if (pNpc == NULL || pNpc->IsDead())//TODO: Fix this, we need to check if it's a non combat npc and skip alive check, or add a state
+		if (pNpc == NULL || pNpc->IsDead() || pNpc->GetType() == 25)//25=summon, shouldn't be seen untill actualy summoned.
 			continue;
 
 		pNpc->GetNpcInfo(result);

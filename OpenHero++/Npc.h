@@ -5,6 +5,54 @@
 #define NPC_UNIQUEID_START 20000
 #define NPC_AGGO_RANGE 40
 
+#define GOSSIP_REQUEST_OPEN_MENU 1
+#define GOSSIP_MENU_STATE 2
+#define GOSSIP_OPTION_STATE 3
+
+enum GossipFlag
+{
+	GOSSIP_FLAG_NEW_GOSSIP_TABLE,
+	GOSSIP_FLAG_OPEN_NPC_TRADE,
+	GOSSIP_FLAG_OPEN_BANK,
+	GOSSIP_FLAG_DISPLAY_RELATED_QUESTS,
+	GOSSIP_FLAG_CHOOSE_QUEST,
+	GOSSIP_FLAG_GOTO,
+	GOSSIP_FLAG_OPEN_WORLDMAP_TELEPORTER,
+	GOSSIP_FLAG_OPEN_STRENGTHEN,
+	GOSSIP_FLAG_OPEN_COMPOSITION,
+	GOSSIP_FLAG_OPEN_EXTRACTION,
+	GOSSIP_FLAG_OPEN_DISMANTLE,
+	GOSSIP_FLAG_OPEN_ADVANCE_FUSION,
+};
+
+#define MAX_GOSSIP_OPTIONS 8
+
+struct _NPC_GOSSIP
+{
+	uint32 gossipId;
+	uint32 npcSayId;
+	uint8 optionCount;
+	uint32 option[MAX_GOSSIP_OPTIONS];
+	uint32 response[MAX_GOSSIP_OPTIONS];
+	uint32 npcId;
+};
+
+struct _GOSSIP_OPTION
+{
+	uint32 optionId;
+	GossipFlag gossipFlag;
+	uint32 goldCost;
+	uint8 toZone;
+};
+//struct _GOSSIP_OPTION
+//{
+//	uint32 optionId;
+//	std::string optionText;
+//	GossipFlag gossipFlag;
+//	uint32 response;
+//	bool disabled;
+//};
+
 enum NpcState
 {
 	NS_ALIVE,
@@ -50,7 +98,8 @@ public:
 
 	virtual uint16 GetID() { return m_uniqueId; }
 	uint16 m_uniqueId;
-	__forceinline uint32 GetNpcID() { return m_npcGroup->m_npcId; }
+	uint32 m_npcId;
+	__forceinline uint32 GetNpcID() { return m_npcId; }
 
 	virtual float GetX() { return m_curX; }
 	virtual float GetZ() { return m_curZ; }
@@ -77,6 +126,9 @@ public:
 	
 	__forceinline uint32 GetRespawnTime() { return m_npcGroup->m_respawnTime; }
 	__forceinline uint32 GetNpcType() { return m_npcData->m_npcType; }
+
+	__forceinline _NPC_DATA* GetNpcData() { return m_npcData; }
+
 	TimeTracker m_killTimeTracker;
 	DeathState m_deathState;
 	float m_curX, m_curZ, m_curY;

@@ -43,7 +43,7 @@ void NpcThreadProc(CNpcThread* pThread)
 						//CNpc* cn = t->GetNpcPtr((*(*n).second));
 					CNpc* n = (*itr).second;
 					itr++;
-					if (n == NULL)
+					if (n == NULL || n->GetType() == 25)//TODO: 25 = summon, if it's actualy summoned start updating.(Summon flag when summoned, remove when revived).
 						continue;
 
 					n->UpdateAI(diff);

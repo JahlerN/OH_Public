@@ -38,6 +38,7 @@ bool CommandHandler::InitCommands()
 		{ "addgold",		&CommandHandler::HandleAddGold,				"Gives user gold. GOLD" },
 		//GM STUFF
 		{ "announce",		&CommandHandler::HandleGMAnnounce,			"Sends a message to all players, displayed at the top of the screen." },
+		{ "reload",			&CommandHandler::HandleReload,				"Reloads db tables, only for Administrators/Devs!" },
 	};
 
 	init_command_table(CommandHandler, commandTable, s_commandTable)
@@ -145,7 +146,7 @@ bool CommandHandler::HandleHome(CommandArgs & vArgs, const char * args, const ch
 
 	uint8 zone = pSendUser->m_userData->m_zone;
 
-	_ZONESTART_POSITION* pData = g_main->GetZoneStartPosition(zone);
+	_ZONESTART_POSITION* pData = sObjMgr->GetZoneStartPosition(zone);
 	if (pData == NULL)
 		return false;
 
@@ -187,6 +188,7 @@ bool CommandHandler::HandleUpgradeItem(CommandArgs & vArgs, const char * args, c
 	uint16 slot = atoi(vArgs.front().c_str());
 	vArgs.pop_front();
 	uint8 upgCode = atoi(vArgs.front().c_str());
+
 
 	return pSendUser->UpgradeItem(slot, upgCode);
 }
@@ -282,7 +284,7 @@ bool CommandHandler::HandleZoneChange(CommandArgs & vArgs, const char * args, co
 
 	//For now we always go to default position when warping to a new zone.
 	_ZONECHANGE_DATA* pZoneChange = new _ZONECHANGE_DATA();
-	_ZONESTART_POSITION* pZoneStart = g_main->GetZoneStartPosition(zoneChangeId);
+	_ZONESTART_POSITION* pZoneStart = sObjMgr->GetZoneStartPosition(zoneChangeId);
 	if (pZoneStart == NULL)
 	{
 		pZoneChange->m_posX = 0;
@@ -473,6 +475,28 @@ bool CommandHandler::HandleAddGold(CommandArgs & vArgs, const char * args, const
 	goldAmount = atoi(vArgs.front().c_str());
 
 	pTarget->GoldChange(goldAmount);
+
+	return true;
+}
+
+bool CommandHandler::HandleReload(CommandArgs & vArgs, const char * args, const char * description, CUser * pSendUser)
+{
+	//sObjMgr->LoadItemSet();
+	//sObjMgr->LoadItemTemplate();
+	//sObjMgr->LoadItemDropTable();
+	//sObjMgr->LoadGamblingItemTable();
+	//sObjMgr->LoadLevelData();
+	//sObjMgr->LoadZoneChangeTable();
+	//sObjMgr->LoadZoneStartPositionTable();
+	//sObjMgr->LoadCharacterInfoTable();
+	sObjMgr->LoadNpcGossipTable();
+	sObjMgr->LoadGossipOptionTable();
+	//sObjMgr->LoadNpcInfoTable();
+	//sObjMgr->LoadNpcGroupTable();
+	//sObjMgr->LoadSkillTable();
+	//sObjMgr->LoadSkillBookTable();
+	//sObjMgr->LoadShopTable();
+	//sObjMgr->LoadShopItemTable();
 
 	return true;
 }

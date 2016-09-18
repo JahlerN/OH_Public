@@ -85,7 +85,7 @@ void SocketMgr::SpawnWorkerThreads()
 	SYSTEM_INFO si;
 	GetSystemInfo(&si);
 
-	m_threadCount = si.dwNumberOfProcessors;// *2;
+	m_threadCount = 2;//si.dwNumberOfProcessors;// *2;
 
 	//TODO: ConsoleLog "SocketMgr - Spawning %u worker threads.\n, m_threadCount);
 	m_threads = new HANDLE[m_threadCount];

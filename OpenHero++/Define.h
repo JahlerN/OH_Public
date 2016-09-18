@@ -27,6 +27,7 @@ struct _NPC_DATA
 	uint8 m_lootRolls;
 	uint32 m_dropId;
 	uint32 m_gold;
+	uint32 m_gossipId;
 	uint32 m_maxHp;
 	uint32 m_maxChi;
 	//Is sent in packet to client, no clue what it does.
@@ -36,7 +37,7 @@ struct _NPC_DATA
 	uint32 m_minSkillDmg;
 	uint32 m_maxSkillDmg;
 
-	__forceinline bool IsMonster() { return m_npcType == 0 || m_dropId == 0 || m_exp == 0 && m_level < 100 || m_divineExp == 0 && m_level < 200 && m_level > 100 || m_darknessExp == 0 && m_level > 200 ? false : true; }
+	__forceinline bool IsMonster() { return m_gossipId == 0; }//{ return m_npcType == 0 || m_dropId == 0 || m_exp == 0 && m_level < 100 || m_divineExp == 0 && m_level < 200 && m_level > 100 || m_darknessExp == 0 && m_level > 200 ? false : true; }
 };
 
 struct _NPC_GROUP
@@ -48,6 +49,24 @@ struct _NPC_GROUP
 	float m_minX, m_minZ, m_maxX, m_maxZ;
 	uint8 m_npcsInGroup;
 	uint32 m_respawnTime;//In seconds.
+};
+
+#define MAX_SHOP_ITEM_TABLES 5
+
+struct _SHOP_TABLE
+{
+	uint32 shopId;
+	std::string shopName;
+	uint32 shopItemTable[MAX_SHOP_ITEM_TABLES];
+};
+
+#define MAX_SHOP_TABLE_ITEMS 20
+
+struct _SHOP_TABLE_ITEM
+{
+	uint32 shopItemId;
+	uint32 itemIds[MAX_SHOP_TABLE_ITEMS];
+	uint32 slot[MAX_SHOP_TABLE_ITEMS];
 };
 
 //Just a player or a GM?

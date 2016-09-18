@@ -10,6 +10,7 @@ CNpc::CNpc(_NPC_DATA* npcData, _NPC_GROUP* npcGroup, MapInstance* mapInstance)
 	}
 	m_npcData = npcData;
 	m_npcGroup = npcGroup;
+	m_npcId = npcGroup->m_npcId;
 	m_curMapInstance = mapInstance;
 	Initialize();
 
@@ -287,7 +288,7 @@ void CNpc::OnDeath(Unit* pKiller, uint32 skillId)
 
 		pUserKiller->GoldChange(GetGoldDrop());
 
-		auto drops = g_main->GenerateItemDropList(m_npcData->m_dropId, m_npcData->m_lootRolls);
+		auto drops = sItemMgr->GenerateItemDropList(m_npcData);//g_main->GenerateItemDropList(m_npcData->m_dropId, m_npcData->m_lootRolls);
 
 		std::list<_ZONE_ITEM*> itemList;
 		if (drops.size() > 0)

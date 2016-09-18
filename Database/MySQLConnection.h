@@ -18,11 +18,13 @@ public:
 	void Close();
 
 	bool ExecuteNonQuery(const char* sql);
-	QueryResult* ExecuteQuery(const char* sql);
+	QueryResult ExecuteQuery(const char* sql);
 
 private:
 	ConnectionInfo m_conInfo;
 	MYSQL* m_mySqlHandle;
+
+	bool PrintErrorAndAttemptReconnect();
 	
 };
 

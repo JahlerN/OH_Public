@@ -40,22 +40,19 @@ bool MySQLConnection::ExecuteNonQuery(const char* sql)
 	if (m_mySqlHandle == NULL)
 		return false;
 
-	if (!mysql_query(m_mySqlHandle, sql))
+	if (mysql_query(m_mySqlHandle, sql))
 	{
-		uint32 err = mysql_errno(m_mySqlHandle);
-
-		printf("SQL Error %d. Attempting reconnection, closing server if it fails.", err);
-		if (!Open(m_conInfo))
-			std::abort();
+		PrintErrorAndAttemptReconnect();
+		return false;
 	}
 
 	return true;
 }
 
-QueryResult* MySQLConnection::ExecuteQuery(const char* sql)
+QueryResult MySQLConnection::ExecuteQuery(const char* sql)
 {
 	if (!sql || m_mySqlHandle == NULL)
-		return NULL;
+		return QueryResult(NULL, NULL, 0, 0);
 
 	MYSQL_RES* result = NULL;
 	MYSQL_FIELD* fields = NULL;
@@ -64,11 +61,8 @@ QueryResult* MySQLConnection::ExecuteQuery(const char* sql)
 
 	if (mysql_query(m_mySqlHandle, sql))
 	{
-		uint32 err = mysql_errno(m_mySqlHandle);
-
-		printf("SQL Error %d. Attempting reconnection, closing server if it fails.", err);
-		if (!Open(m_conInfo))
-			std::abort();
+		PrintErrorAndAttemptReconnect();
+		return QueryResult(NULL, NULL, 0, 0);
 	}
 
 	result = mysql_store_result(m_mySqlHandle);
@@ -76,14 +70,26 @@ QueryResult* MySQLConnection::ExecuteQuery(const char* sql)
 	fieldCount = mysql_field_count(m_mySqlHandle);
 
 	if (result == NULL)
-		return NULL;
+		return QueryResult(NULL, NULL, 0, 0);
 
 	if (rowCount <= 0)
 	{
 		mysql_free_result(result);
-		return NULL;
+		return QueryResult(NULL, NULL, 0, 0);
 	}
 	fields = mysql_fetch_fields(result);
 
-	return new QueryResult(result, fields, rowCount, fieldCount);
+	return QueryResult(result, fields, rowCount, fieldCount);
+}
+
+bool MySQLConnection::PrintErrorAndAttemptReconnect()
+{
+	uint32 err = mysql_errno(m_mySqlHandle);
+	std::string errMsg = mysql_error(m_mySqlHandle);
+
+	printf("SQL Error %d: %s.\n\n Attempting reconnection, closing server if it fails.", err, errMsg.c_str());
+	if (!Open(m_conInfo))
+		std::abort();
+
+	return true;
 }

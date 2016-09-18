@@ -4,14 +4,10 @@
 #include "User.h"
 #include "NpcThread.h"
 #include "..\SharedFiles\Timer.h"
-//#include "../Database/MySQLConnection.h"
-//#include "MAP.h"
 
 #include <unordered_map>
 
-//class CUser;
 typedef std::unordered_map<std::string, CUser*> NameMap;
-typedef std::map<uint8, std::map<uint16, CNpc*>> NpcArray;
 
 class GameServer
 {
@@ -33,13 +29,6 @@ public:
 
 	CUser* GetUserPtr(const char* userId, NameTypes t);
 	__forceinline CUser* GetUserPtr(int sId) { return s_socketMgr[sId]; }
-	//SERVER_INSTANCE_CHANGE
-	//void RegionUserInfoToMe(CUser* pUser);
-	//void RegionNpcInfoToMe(CUser* pSender);
-	//void GetRegionUserList(MAP* map, uint16 rx, uint16 rz, CUser* pSendUser);//, Packet& result);
-	//void SendRegionUserList(MAP* map, uint16 rx, uint16 rz, CUser* pSendUser);
-	//void SendRegionNpcList(MAP* map, uint16 rx, uint16 rz, CUser* pSendUser);
-	//MAP* GetZoneById(uint8 zoneId);
 
 	//Used when logout;
 	void RemoveSessions(CUser* pSession);
@@ -52,12 +41,6 @@ public:
 
 	
 	void SendToAll(Packet& pkt);
-	//SERVER_INSTANCE_CHANGE
-	/*void SendToRegion(Packet& pkt, MAP* map, int x, int z, CUser* exceptUser);
-	void SendToOldRegions(Packet* pkt, int oX, int oZ, MAP* pMap, int x, int z, CUser* pExceptUser = NULL);
-	void SendToNewRegions(Packet* pkt, int nX, int nZ, MAP* pMap, int x, int z, CUser* pExceptUser = NULL);
-	void SendToRegionUnit(Packet* pkt, MAP* map, int x, int z, CUser* exceptUser = NULL);
-	bool RegionIntersect(int oX, int oZ, int rPosX, int rPosZ);*/
 
 	char m_gameDBName[32], m_accountDBName[32];
 	char m_gameDBId[32], m_accountDBId[32];
@@ -70,25 +53,6 @@ public:
 	uint64 GetExpReqByLevel(uint16 level);
 	uint32 GetStatPointsByLevel(uint16 level);
 	uint32 GetElementPointsByLevel(uint16 level);
-
-	//_CHARACTER_DATA* GetCharacterDataByType(uint8 type);
-	__forceinline _SKILL_BOOK_DATA* GetSkillBookData(uint32 bookId) { return m_skillBookTableArray.GetData(bookId); }
-	__forceinline _SKILL_DATA* GetSkillDataById(uint32 skillId) { return m_skillTableArray.GetData(skillId); }
-	__forceinline _ZONESTART_POSITION* GetZoneStartPosition(uint8 zoneId) { return m_zoneStartTableArray.GetData(zoneId); }
-	__forceinline _NPC_DATA* GetNpcTemplateById(uint32 npcId) { return m_npcInfoArray.GetData(npcId); }
-
-	__forceinline NpcTableArray GetNpcTableArray() { return m_npcTableArray; }
-	//__forceinline ZoneTableArray GetZoneTableArray() { return m_zoneTableArray; }
-
-	__forceinline std::map<uint16, CNpc*> GetNpcListForServer(uint8 serverId)
-	{
-		auto npcs = m_npcArray.find(serverId);
-		if (npcs != m_npcArray.end())
-		{
-			return npcs->second;
-		}
-		return std::map<uint16, CNpc*>();
-	}
 
 	//TODO: Move this to like, ItemDropFactory
 	__forceinline std::list<_ITEM_DATA*> GenerateItemDropList(uint32 dropId, uint8 lootRolls)
@@ -157,9 +121,6 @@ public:
 	void SaveIngamePlayers();
 	void UpdateServerUserCount();
 
-	//TODO: Temporary while we only handle 1 server!
-	uint32 m_npcCount;
-
 private:
 	float m_lastTime;
 	bool m_isRunning = true;
@@ -167,24 +128,10 @@ private:
 
 	ServerInstanceMgr* m_serverInstanceMgr;
 
-	//ZoneTableArray m_zoneTableArray;
-
 	//TODO: When i have time, i'd like to place these in their own classes, i don't think it's reasonable to keep them all in the main server class.
 	//Considering all functions to grab values from them.
 
-
-	//ZoneChangeTableArray m_zoneChangeTableArray;
-	CharacterInfoArray m_characterInfoArray;
-	NpcInfoArray m_npcInfoArray;
-	NpcTableArray m_npcTableArray;
-	SkillTableArray m_skillTableArray;
 	SkillBookTableArray m_skillBookTableArray;
-	ZoneStartTableArray m_zoneStartTableArray;
-
-	//Get npcs per server phase
-	NpcArray m_npcArray;
-
-	CNpcThreadMgr* m_npcThreadMgr;
 
 	std::vector<IntervalTimer> m_timers;
 

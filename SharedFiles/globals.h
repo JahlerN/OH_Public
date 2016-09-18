@@ -113,6 +113,10 @@ enum WeaponTypes
 #define MAX_EQUIP_SLOTS EQUIP_SLOT + CASHSHOP_EQUIP_SLOT + SECONDARY_ACC_SLOT + PET_ARMOR_SLOT// + FIVE_ELEMENT_SLOT TODO: Implement five elements
 #define INV_1_START 0x0B
 #define INV_1_END 0x42 
+#define BANK_1_START 0x43
+#define BANK_2_START 0x7F
+//#define BANK_3_START 0xBB
+//#define BANK_4_START 0xF7
 #define CASHSHOP_EQUIP_START 0x0133
 #define SECONDARY_ACC_START 0x0138
 #define PET_ARMOR_START 0x013D
@@ -159,6 +163,19 @@ struct _ITEM_DATA
 		if (upgradeCount == MAX_ITEM_UPGRADE_AMOUNT)
 			return; //Max upgrade count;
 		upgrades[upgradeCount++] = upgCode;
+	}
+
+	void RemoveUpgrades(uint8 count)
+	{
+		if (itemId == 0 || count == 0)
+			return;
+
+		for (int i = 0; i < count; i++)
+		{
+			if (upgradeCount == 0)
+				break;
+			upgrades[--upgradeCount] = 0;
+		}
 	}
 
 	void HoleItem(uint8 hole)

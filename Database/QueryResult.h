@@ -11,6 +11,7 @@ public:
 
 	void Delete();
 
+	bool IsEmpty();
 	bool NextRow();
 
 	bool GetBool();

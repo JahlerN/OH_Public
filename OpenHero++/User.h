@@ -212,7 +212,9 @@ public:
 	TimeTracker m_blinkTimer;
 	int8 m_blinkCount;
 	TimeTracker m_meditationTimer;
-	//float m_meditationTick;
+	//float m_meditationTick; 
+
+	CNpc* m_currentGossip;
 
 
 	void Update(uint32 diff);
@@ -226,6 +228,7 @@ public:
 	bool GoToXZ(uint16 posX, uint16 posZ);
 	//TODO: Make an option to stay on the same coordinates.
 	void ChangeZone(_ZONECHANGE_DATA* pZone);
+	void ChangeZone(_ZONESTART_POSITION* pZone);
 
 	virtual const char* GetName() { return m_userData->m_charId; }
 
@@ -302,7 +305,15 @@ public:
 	void HandleLoadingscreenUnk3(Packet& pkt);
 	void HandleCharacterMovement(Packet& pkt);
 
+	void HandleNpcGossip(Packet& pkt);
 	void HandleNpcConvoTesting(Packet& pkt);
+
+	void SendNpcGossip(CNpc* pNpc);
+	void SendNpcGossip(uint32 gossipId);
+	void SendOpenNpcExchange(_SHOP_TABLE* pShop);
+	void SendOpenWorldMapTeleporter();
+
+	void HandleWorldMapTeleporter(Packet& pkt);
 
 	void RemoveOldPlayersInVision(int x, int z);
 	void RemovePlayersOutsideOfVision(Region* pRegion);
@@ -340,7 +351,8 @@ public:
 	//returns the total count of given itemId
 	uint32 FindItemTotalCount(uint32 itemId);
 
-	void GiveItem(uint32 itemId, uint16 count = 1);
+	bool GiveItem(uint32 itemId, uint16 count = 1);
+	bool GiveItem(uint32 itemId, int pos, uint16 count = 1);
 	//Give an already created item(Can be used in trades aswell i guess?)
 	void GiveItem(_ITEM_DATA* pItem, int pos = -1);
 	void GiveGambledItem(_ITEM_DATA* pItem, _ITEM_TABLE* pTable, _GAMBLING_ITEM_TABLE* pGamble, int16 slot);
@@ -358,7 +370,8 @@ public:
 	void SendMoveItem(uint32 itemId, uint16 oldPos, uint16 newPos);
 	void SendMoveItemItem(uint32 oldItemId, uint32 newItemId, uint16 oldPos, uint16 newPos);
 	void SendMoveItemSplitStack(_ITEM_TABLE* pItem, uint16 oldCount, uint16 newCount, uint16 oldPos, uint16 newPos);
-	void SendBoughtItem(_ITEM_TABLE* pTable, uint16 count, uint32 duration, uint16 pos, bool newItem = false);
+	void SendBoughtItem(_ITEM_TABLE* pTable, uint16 count, uint32 duration, uint16 pos);
+	void SendSoldItem(_ITEM_TABLE* pTable, uint16 pos);
 	void SendAcquireItem(_ITEM_DATA* pItem, _ITEM_TABLE* pTable, uint16 pos, bool newItem = false);
 	void SendUseItem(uint32 itemId);
 	void SendRemoveItem(uint32 itemId, uint16 pos);
@@ -368,11 +381,35 @@ public:
 	void SendRemoveMultiSlotContainer(uint32 itemId, int16 slot);
 	void SendUsePotion();
 	void SendVisibleItemListToRegion();
+	//Doesn't show up in the chat log.
+	void SendUpdateGoldSilent();
 	ByteBuffer GetVisibleItemList();
 
+	void SendUpgradeItemResult(uint8 res, uint16 slot, _ITEM_TABLE* pTable);
+	void SendItemModificationStatusMessage(uint8 action, uint16 status, uint8 showType = 1);
+	//Doesn't show up in the chat log.
+	void SendAddItemSilent(_ITEM_DATA* pItem, _ITEM_TABLE* pTable, uint16 slot);
 	bool UpgradeItem(uint16 slot, uint8 upgCode);
 	//bool HoleItem(uint16 slot, uint8 upgCode);
 	void SendGoldUpdate();
+
+	////////////////
+	// Bank stuff //
+	////////////////
+	void SendOpenBank();
+	void HandleBankGold(Packet& pkt);
+
+	void OpenStrengtheningWindow();
+	void OpenCompositionWindow();
+	void OpenAdvancedFusionWindow();
+	void OpenExtractionWindow();
+	void OpenDismantleWindow();
+	void RemoveBySlot(int slot);
+
+	void HandleNpcExchange(Packet& pkt);
+	void HandleItemModification(Packet& pkt);
+
+
 private:
 	//Returns new item
 	_ITEM_DATA* AddItemToSlot(_ITEM_DATA* pNewItem, int16 slot);
